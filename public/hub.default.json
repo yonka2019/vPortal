@@ -1,0 +1,200 @@
+{
+  "title": "VPortal",
+  "subtitle": "",
+  "sections": [
+    {
+      "id": "every-day",
+      "title": "Every day",
+      "links": [
+        {
+          "id": "l-github",
+          "title": "GitHub",
+          "url": "https://github.com",
+          "desc": "Repositories and pull requests",
+          "iconSlug": "github",
+          "iconColor": "#181717",
+          "size": "l",
+          "newTab": true,
+          "clicks": 0
+        },
+        {
+          "id": "l-gmail",
+          "title": "Gmail",
+          "url": "https://mail.google.com",
+          "desc": "",
+          "iconSlug": "gmail",
+          "iconColor": "#EA4335",
+          "size": "s",
+          "newTab": true,
+          "clicks": 0
+        },
+        {
+          "id": "l-calendar",
+          "title": "Calendar",
+          "url": "https://calendar.google.com",
+          "desc": "",
+          "iconSlug": "googlecalendar",
+          "iconColor": "#4285F4",
+          "size": "s",
+          "newTab": true,
+          "clicks": 0
+        },
+        {
+          "id": "l-youtube",
+          "title": "YouTube",
+          "url": "https://youtube.com",
+          "desc": "",
+          "iconSlug": "youtube",
+          "iconColor": "#FF0000",
+          "size": "w",
+          "newTab": true,
+          "clicks": 0
+        },
+        {
+          "id": "l-reddit",
+          "title": "Reddit",
+          "url": "https://reddit.com",
+          "desc": "",
+          "iconSlug": "reddit",
+          "iconColor": "#FF4500",
+          "size": "s",
+          "newTab": true,
+          "clicks": 0
+        },
+        {
+          "id": "l-wikipedia",
+          "title": "Wikipedia",
+          "url": "https://wikipedia.org",
+          "desc": "",
+          "iconSlug": "wikipedia",
+          "iconColor": "#000000",
+          "size": "s",
+          "newTab": true,
+          "clicks": 0
+        }
+      ]
+    },
+    {
+      "id": "build",
+      "title": "Build",
+      "links": [
+        {
+          "id": "l-stackoverflow",
+          "title": "Stack Overflow",
+          "url": "https://stackoverflow.com",
+          "desc": "Answers, eventually",
+          "iconSlug": "stackoverflow",
+          "iconColor": "#F58025",
+          "size": "w",
+          "newTab": true,
+          "clicks": 0
+        },
+        {
+          "id": "l-npm",
+          "title": "npm",
+          "url": "https://npmjs.com",
+          "desc": "",
+          "iconSlug": "npm",
+          "iconColor": "#CB3837",
+          "size": "s",
+          "newTab": true,
+          "clicks": 0
+        },
+        {
+          "id": "l-docker",
+          "title": "Docker Hub",
+          "url": "https://hub.docker.com",
+          "desc": "",
+          "iconSlug": "docker",
+          "iconColor": "#2496ED",
+          "size": "s",
+          "newTab": true,
+          "clicks": 0
+        },
+        {
+          "id": "l-typescript",
+          "title": "TypeScript",
+          "url": "https://typescriptlang.org",
+          "desc": "",
+          "iconSlug": "typescript",
+          "iconColor": "#3178C6",
+          "size": "s",
+          "newTab": true,
+          "clicks": 0
+        },
+        {
+          "id": "l-vite",
+          "title": "Vite",
+          "url": "https://vite.dev",
+          "desc": "",
+          "iconSlug": "vite",
+          "iconColor": "#646CFF",
+          "size": "s",
+          "newTab": true,
+          "clicks": 0
+        }
+      ]
+    },
+    {
+      "id": "home",
+      "title": "At home",
+      "links": [
+        {
+          "id": "l-spotify",
+          "title": "Spotify",
+          "url": "https://open.spotify.com",
+          "desc": "",
+          "iconSlug": "spotify",
+          "iconColor": "#1ED760",
+          "size": "t",
+          "newTab": true,
+          "clicks": 0
+        },
+        {
+          "id": "l-plex",
+          "title": "Plex",
+          "url": "https://app.plex.tv",
+          "desc": "",
+          "iconSlug": "plex",
+          "iconColor": "#EBAF00",
+          "size": "s",
+          "newTab": true,
+          "clicks": 0
+        },
+        {
+          "id": "l-homeassistant",
+          "title": "Home Assistant",
+          "url": "http://homeassistant.local:8123",
+          "desc": "Lights, sensors, automations",
+          "iconSlug": "homeassistant",
+          "iconColor": "#18BCF2",
+          "size": "w",
+          "newTab": true,
+          "clicks": 0
+        },
+        {
+          "id": "l-router",
+          "title": "Router",
+          "url": "http://192.168.1.1",
+          "desc": "",
+          "iconSlug": "lucide:network",
+          "iconColor": "#9AA8C4",
+          "size": "s",
+          "newTab": true,
+          "clicks": 0
+        },
+        {
+          "id": "l-nas",
+          "title": "NAS",
+          "url": "http://nas.local:5000",
+          "desc": "",
+          "iconSlug": "lucide:hard-drive",
+          "iconColor": "#9AA8C4",
+          "size": "s",
+          "newTab": true,
+          "clicks": 0
+        }
+      ]
+    }
+  ]
+}

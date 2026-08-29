@@ -1,0 +1,1352 @@
+/* ============================================================ aurora sky */
+
+/* 100vw, not inset:0 — a fixed box stops at the scrollbar, which left a hard unlit
+   strip down the right edge of the page. `overflow-x: clip` on html keeps the extra
+   width from producing a horizontal scrollbar. */
+.aurora {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  z-index: -2;
+  overflow: hidden;
+  pointer-events: none;
+  background: radial-gradient(120% 80% at 50% -10%, var(--void-2) 0%, var(--void) 60%);
+}
+
+.aurora__blob {
+  position: absolute;
+  width: 68vmax;
+  height: 68vmax;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, currentColor 0%, transparent 62%);
+  mix-blend-mode: screen;
+  transition: color 900ms var(--ease);
+  will-change: transform;
+}
+
+.aurora__blob--1 {
+  color: var(--violet);
+  color: color-mix(in oklab, var(--beam) 62%, var(--violet));
+  top: -34%;
+  left: -18%;
+  opacity: 0.55;
+  animation: drift-1 38s ease-in-out infinite;
+}
+
+.aurora__blob--2 {
+  color: var(--jade);
+  color: color-mix(in oklab, var(--beam) 42%, var(--jade));
+  top: -6%;
+  right: -30%;
+  opacity: 0.45;
+  animation: drift-2 47s ease-in-out infinite;
+}
+
+.aurora__blob--3 {
+  color: var(--rose);
+  color: color-mix(in oklab, var(--beam) 34%, var(--rose));
+  bottom: -46%;
+  left: 26%;
+  opacity: 0.36;
+  animation: drift-3 59s ease-in-out infinite;
+}
+
+/* the light comes from above: everything below the fold settles back to black */
+.aurora__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(6, 9, 15, 0) 0%, rgba(6, 9, 15, 0.5) 46%, var(--void) 92%);
+}
+
+/* fine grain, so the gradients never look like plastic */
+.aurora__grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@keyframes drift-1 {
+  50% {
+    transform: translate3d(9vw, 6vh, 0) scale(1.12);
+  }
+}
+@keyframes drift-2 {
+  50% {
+    transform: translate3d(-11vw, 9vh, 0) scale(0.9);
+  }
+}
+@keyframes drift-3 {
+  50% {
+    transform: translate3d(7vw, -8vh, 0) scale(1.15);
+  }
+}
+
+/* ============================================================== structure */
+
+.shell {
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: 0 28px 140px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 0;
+}
+
+/* ------------------------------------------------------------------ rss */
+
+/* Thin notice above the topbar: the newest feed item, marked while unread. */
+.rss {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 7px 14px;
+  border-radius: 99px;
+  border: 1px solid var(--stroke);
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  font-size: 0.85rem;
+}
+
+.rss--new {
+  border-color: rgba(52, 224, 180, 0.35);
+  border-color: color-mix(in oklab, var(--jade) 35%, var(--stroke));
+}
+
+.rss__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: none;
+}
+
+.rss--new .rss__tag {
+  color: var(--jade);
+}
+
+.rss__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 99px;
+  background: var(--jade);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rss__dot {
+    animation: rss-pulse 2s infinite;
+  }
+  @keyframes rss-pulse {
+    50% {
+      opacity: 0.35;
+    }
+  }
+}
+
+.rss__link {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ice-2);
+}
+
+.rss__link:hover {
+  color: var(--ice);
+}
+
+.rss__ack {
+  flex: none;
+  margin-left: auto;
+  padding: 0 6px;
+  border: 0;
+  background: none;
+  color: var(--ice-3);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.rss__ack:hover {
+  color: var(--ice);
+}
+
+.mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  font-family: var(--display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* ============================================================ edit mode */
+
+.tile--editing {
+  cursor: default;
+}
+
+/* one line, always — these must never wrap onto a second row inside a tile */
+.tile__tools {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+}
+
+.tile__tools .btn--icon {
+  padding: 6px;
+}
+
+.tile__tools .drag {
+  width: 22px;
+  height: 26px;
+}
+
+/* ============================================================ edit dialog */
+
+.sheet {
+  width: min(520px, 100%);
+  border-radius: 24px;
+  border: 1px solid var(--stroke-2);
+  background: rgba(12, 17, 30, 0.94);
+  -webkit-backdrop-filter: blur(28px) saturate(150%);
+
+  backdrop-filter: blur(28px) saturate(150%);
+  box-shadow: 0 40px 90px -30px rgba(0, 0, 0, 0.9);
+  overflow: hidden;
+  animation: sheet-in 0.24s var(--ease);
+}
+
+.sheet__head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 22px;
+  border-bottom: 1px solid var(--stroke);
+}
+
+.sheet__title {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.2rem;
+  letter-spacing: -0.03em;
+  margin: 2px 0 0;
+}
+
+.sheet__body {
+  display: grid;
+  gap: 14px;
+  padding: 20px 22px;
+}
+
+.sheet__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--stroke);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.tile__name--empty {
+  color: var(--ice-3);
+  font-style: italic;
+}
+
+.tile__warn {
+  color: var(--rose);
+}
+
+/* the toolbar floats over the tile's top-right corner and never changes its size */
+.tile--editing .tile__tools {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 3px;
+  border-radius: 12px;
+  background: rgba(6, 9, 15, 0.72);
+  border: 1px solid var(--stroke);
+  opacity: 0.5;
+  transition: opacity 0.2s var(--ease);
+}
+
+.tile--editing:hover .tile__tools,
+.tile--editing:focus-within .tile__tools {
+  opacity: 1;
+}
+
+.section--editing .section__head {
+  align-items: center;
+}
+
+.section__title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* .input already sets width:100%, so these need the extra class to win */
+.input.input--section {
+  font-family: var(--display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  border-color: transparent;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.input.input--mark {
+  width: min(260px, 40vw);
+  font-family: var(--display);
+  font-size: 1.02rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  padding: 8px 13px;
+}
+
+.add-link,
+.add-section {
+  width: 100%;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.add-section {
+  margin-top: 8px;
+}
+
+.topbar__nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* sits on the same line as the hub name, after a hairline divider */
+.greeting {
+  margin: 0;
+  padding-left: 14px;
+  margin-left: 14px;
+  border-left: 1px solid var(--stroke-2);
+  font-family: var(--body);
+  font-weight: 400;
+  font-size: 0.95rem;
+  letter-spacing: 0;
+  color: var(--ice-2);
+  white-space: nowrap;
+  animation: greeting-in 0.6s var(--ease) backwards;
+}
+
+@keyframes greeting-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+    filter: blur(3px);
+  }
+}
+
+.clock {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+}
+
+.mark__orb {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--beam);
+  box-shadow: 0 0 16px 2px var(--beam);
+  box-shadow: 0 0 16px 2px color-mix(in oklab, var(--beam) 70%, transparent);
+  transition: background 900ms var(--ease), box-shadow 900ms var(--ease);
+}
+
+/* ================================================================ buttons */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 18px;
+  border-radius: 99px;
+  border: 0;
+  background: var(--pill);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  /* no backdrop-filter and no brightness() here: buttons sit on top of tiles that are
+     already blurred, and stacking the two smears everything behind them on hover */
+  transition: background 0.2s var(--ease), color 0.2s var(--ease), transform 0.16s var(--ease);
+}
+
+.btn:hover {
+  background: rgba(58, 66, 86, 0.92);
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn--primary {
+  background: var(--ice);
+  color: #080b12;
+}
+
+.btn--primary:hover {
+  background: #ffffff;
+}
+
+.btn--ghost {
+  background: none;
+  color: var(--ice-2);
+}
+
+.btn--ghost:hover {
+  color: var(--ice);
+  background: var(--pill);
+}
+
+.btn--danger:hover {
+  color: var(--rose);
+  background: var(--pill);
+  background: color-mix(in oklab, var(--rose) 20%, var(--pill));
+}
+
+/* This tab / New tab — an ordinary pill, but on toggle the glyph spins through itself
+   and the words roll vertically. Transforms and opacity only — no filter on buttons. */
+.tabswitch__glyphs,
+.tabswitch__words {
+  display: grid;
+}
+
+.tabswitch__glyphs {
+  place-items: center;
+}
+
+.tabswitch__words {
+  justify-items: start;
+}
+
+.tabswitch__glyph {
+  grid-area: 1 / 1;
+  display: grid;
+  place-items: center;
+  transition: opacity 0.25s var(--ease), transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tabswitch__glyph--new,
+.tabswitch--on .tabswitch__glyph--same {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.4);
+}
+
+.tabswitch--on .tabswitch__glyph--new {
+  opacity: 1;
+  transform: none;
+}
+
+.tabswitch__word {
+  grid-area: 1 / 1;
+  white-space: nowrap;
+  transition: opacity 0.25s var(--ease), transform 0.4s var(--ease);
+}
+
+.tabswitch__word--on,
+.tabswitch--on .tabswitch__word--off {
+  opacity: 0;
+  transform: translateY(0.55em);
+}
+
+.tabswitch--on .tabswitch__word--off {
+  transform: translateY(-0.55em);
+}
+
+.tabswitch--on .tabswitch__word--on {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tabswitch__glyph,
+  .tabswitch__word {
+    transition: none;
+  }
+}
+
+.btn[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn[disabled]:hover {
+  background: var(--pill);
+}
+
+.btn--primary[disabled]:hover {
+  background: var(--ice);
+}
+
+kbd {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.32);
+  color: var(--ice-2);
+}
+
+.btn--primary kbd {
+  background: rgba(0, 0, 0, 0.12);
+  color: #3a4152;
+}
+
+/* =============================================================== sections */
+
+.section {
+  padding: 34px 0 0;
+}
+
+.section__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 0 14px;
+  border-top: 1px solid var(--stroke);
+}
+
+.section__title {
+  font-size: 1.35rem;
+}
+
+/* ========================================================== category rail */
+
+/* Topbar and the Most-opened strip stay full width; only the sections get a rail. */
+.withnav {
+  display: grid;
+  grid-template-columns: 148px minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.sidenav {
+  position: sticky;
+  /* clears the topbar, which scrolls away with the page */
+  top: 20px;
+  width: 148px;
+  justify-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 34px;
+  padding: 10px 8px 8px;
+  border-radius: 22px;
+  border: 1px solid var(--stroke);
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+}
+
+.sidenav__caption {
+  padding: 4px 10px 8px;
+}
+
+.sidenav__item {
+  --accent: var(--violet);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 13px;
+  color: var(--ice-2);
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: background 0.18s var(--ease), color 0.18s var(--ease);
+}
+
+.sidenav__item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ice);
+}
+
+.sidenav__item--on {
+  color: var(--ice);
+  background: rgba(124, 107, 255, 0.16);
+  background: color-mix(in oklab, var(--accent) 16%, transparent);
+}
+
+.sidenav__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidenav__count {
+  margin-left: auto;
+  padding-left: 8px;
+  letter-spacing: 0.06em;
+}
+
+/* Wide enough for the rail to hang in the gutter: it leaves the grid (zero-width column)
+   and parks at the window's left edge, so the bento keeps exactly the width it has
+   always had. Narrower than this and it would sit on top of the first column, so there
+   it stays in the layout and the grid gives it room. */
+@media (min-width: 1500px) {
+  .withnav {
+    grid-template-columns: 0 minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .sidenav {
+    margin-left: calc(var(--page) / 2 - 50vw - 4px);
+  }
+}
+
+/* The rail jumps by `#anchor`, so the heading must not hide under the topbar. */
+.section__head[id] {
+  scroll-margin-top: 18px;
+}
+
+/* ============================================================ bento tiles */
+
+.bento {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: 136px;
+  gap: 12px;
+  /* dense packing is what lets mixed tile sizes tile without leaving holes */
+  grid-auto-flow: row dense;
+}
+
+.tile {
+  --brand: var(--violet);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 22px;
+  border-radius: 28px;
+  border: 1px solid var(--stroke);
+  border: 1px solid color-mix(in oklab, var(--brand) 22%, var(--stroke));
+  background: rgba(10, 14, 22, 0.6);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+
+  backdrop-filter: blur(18px) saturate(140%);
+  overflow: hidden;
+  transition: transform 0.34s cubic-bezier(0.2, 1.25, 0.4, 1), border-color 0.3s var(--ease);
+  animation: tile-in 0.5s var(--ease) backwards;
+}
+
+@keyframes tile-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+}
+
+/* the brand arrives as a light source in the top-right corner, not as a flat wash */
+.tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(120% 110% at 100% 0%, var(--brand) 0%, transparent 62%);
+  background: radial-gradient(
+    120% 110% at 100% 0%,
+    color-mix(in oklab, var(--brand) 55%, transparent) 0%,
+    transparent 62%
+  );
+  opacity: 0.5;
+  transition: opacity 0.3s var(--ease);
+  pointer-events: none;
+}
+
+.tile:hover,
+.tile:focus-visible {
+  transform: scale(1.02);
+  border-color: var(--stroke-2);
+  border-color: color-mix(in oklab, var(--brand) 55%, var(--stroke-2));
+}
+
+.tile:hover::before,
+.tile:focus-visible::before {
+  opacity: 0.85;
+}
+
+/* spans come from the link's chosen size, set inline; only the trimmings differ here */
+.tile--l {
+  padding: 28px;
+}
+
+.tile--l .tile__icon {
+  width: 52px;
+  height: 52px;
+}
+
+.tile--l .tile__name {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  letter-spacing: -0.04em;
+}
+
+.tile__icon {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  display: block;
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.6));
+}
+
+/* A link's mark. One-colour icons are a mask tinted by CSS — there is no server to
+   recolour an SVG here. The wrapper holds the size and the shadow; the child is masked. */
+.licon {
+  display: block;
+  flex: none;
+}
+
+.licon > * {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.licon__mask {
+  background: var(--icon-color, #9aa8c4);
+  -webkit-mask: var(--icon) center / contain no-repeat;
+  mask: var(--icon) center / contain no-repeat;
+}
+
+/* The upload sits at the far end of the dialog's head row. */
+.sheet__upload {
+  margin-left: auto;
+}
+
+.tile__body {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tile__name {
+  font-weight: 600;
+  font-size: 0.97rem;
+  letter-spacing: -0.012em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tile__sub {
+  font-size: 0.79rem;
+  color: var(--ice-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tile__out {
+  position: absolute;
+  top: 15px;
+  right: 16px;
+  color: var(--ice-3);
+  opacity: 0;
+  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+}
+
+.tile:hover .tile__out {
+  opacity: 1;
+  transform: translate(2px, -2px);
+}
+
+/* =============================================================== frequent */
+
+.frequent {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  padding: 0 0 12px;
+}
+
+.chip {
+  --brand: var(--violet);
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 16px 8px 11px;
+  border-radius: 99px;
+  border: 1px solid var(--stroke);
+  border: 1px solid color-mix(in oklab, var(--brand) 26%, var(--stroke));
+  background: var(--glass);
+  background: color-mix(in oklab, var(--brand) 14%, var(--glass));
+  -webkit-backdrop-filter: blur(14px);
+
+  backdrop-filter: blur(14px);
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: transform 0.25s var(--ease), background 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+
+.chip:hover {
+  transform: translateY(-2px);
+  background: var(--glass-2);
+  background: color-mix(in oklab, var(--brand) 26%, var(--glass-2));
+  border-color: var(--stroke-2);
+  border-color: color-mix(in oklab, var(--brand) 50%, var(--stroke-2));
+}
+
+.chip .licon {
+  width: 17px;
+  height: 17px;
+}
+
+.chip__count {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--ice-3);
+}
+
+/* ================================================================ palette */
+
+.palette {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  align-items: start;
+  justify-items: center;
+  /* scrollable, and the top gap shrinks on short screens — otherwise a tall dialog's
+     footer (Delete link / Done) sits below the fold with no way to reach it */
+  overflow-y: auto;
+  padding: clamp(16px, 12vh, 140px) 20px 20px;
+  background: rgba(4, 6, 11, 0.62);
+  -webkit-backdrop-filter: blur(6px);
+
+  backdrop-filter: blur(6px);
+  animation: fade-in 0.18s var(--ease);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.palette__sheet {
+  width: min(620px, 100%);
+  border-radius: 22px;
+  border: 1px solid var(--stroke-2);
+  background: rgba(12, 17, 30, 0.88);
+  -webkit-backdrop-filter: blur(28px) saturate(150%);
+
+  backdrop-filter: blur(28px) saturate(150%);
+  box-shadow: 0 40px 90px -30px rgba(0, 0, 0, 0.9);
+  overflow: hidden;
+  animation: sheet-in 0.24s var(--ease);
+}
+
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.985);
+  }
+}
+
+.palette__input {
+  width: 100%;
+  padding: 19px 22px;
+  border: 0;
+  border-bottom: 1px solid var(--stroke);
+  background: none;
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.palette__input::placeholder {
+  color: var(--ice-3);
+}
+
+.palette__list {
+  max-height: min(52vh, 420px);
+  overflow-y: auto;
+  padding: 8px;
+  margin: 0;
+  list-style: none;
+}
+
+.palette__item {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 99px;
+  cursor: pointer;
+}
+
+.palette__item[aria-selected='true'] {
+  background: var(--glass-2);
+  background: color-mix(in oklab, var(--brand) 24%, var(--glass-2));
+}
+
+.palette__item .licon {
+  width: 19px;
+  height: 19px;
+}
+
+.palette__name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.palette__empty {
+  padding: 26px 22px;
+  color: var(--ice-3);
+  font-size: 0.9rem;
+}
+
+.palette__foot {
+  display: flex;
+  gap: 16px;
+  padding: 11px 18px;
+  border-top: 1px solid var(--stroke);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* ================================================================== admin */
+
+.admin-bar__status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--jade);
+}
+
+.dot--dirty {
+  background: var(--rose);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.field {
+  display: grid;
+  gap: 5px;
+}
+
+.input {
+  width: 100%;
+  padding: 11px 15px;
+  border-radius: 12px;
+  border: 1px solid var(--stroke);
+  background: rgba(0, 0, 0, 0.28);
+  outline: none;
+  transition: border-color 0.2s var(--ease);
+}
+
+.input:focus {
+  border-color: var(--beam);
+  border-color: color-mix(in oklab, var(--beam) 60%, transparent);
+}
+
+.drag {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 32px;
+  border-radius: 99px;
+  border: 0;
+  background: none;
+  color: var(--ice-3);
+  cursor: grab;
+}
+
+.drag:hover {
+  color: var(--ice);
+  background: var(--pill);
+}
+
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.btn--icon {
+  padding: 9px;
+  border-radius: 99px;
+}
+
+/* Tile-colour row: toggle with a preview dot, then a colour well for a custom tint. */
+.tintrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tint__well {
+  width: 36px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--stroke-2);
+  border-radius: 9px;
+  background: none;
+  cursor: pointer;
+}
+
+.tint__well::-webkit-color-swatch-wrapper {
+  padding: 3px;
+}
+
+.tint__well::-webkit-color-swatch {
+  border: 0;
+  border-radius: 6px;
+}
+
+/* Tile-size switches: each button draws the proportion it produces, filled when on. */
+.sizes {
+  display: inline-flex;
+  justify-self: start;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 13px;
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid var(--stroke);
+}
+
+.sizes__btn {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 28px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  cursor: pointer;
+  color: var(--ice-3);
+  transition: background 0.18s var(--ease), color 0.18s var(--ease), box-shadow 0.18s var(--ease);
+}
+
+.sizes__btn:hover {
+  color: var(--ice);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.sizes__btn--on {
+  color: var(--ice);
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.sizes__btn--on rect {
+  fill: currentColor;
+  fill-opacity: 0.28;
+}
+
+/* ============================================================ icon picker */
+
+.picker {
+  position: relative;
+}
+
+.picker__trigger {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  border: 1px dashed var(--stroke-2);
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+}
+
+.picker__trigger .licon {
+  width: 22px;
+  height: 22px;
+}
+
+.picker__pop {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 8px);
+  left: 0;
+  width: min(420px, 78vw);
+  padding: 12px;
+  border-radius: 20px;
+  border: 1px solid var(--stroke-2);
+  background: rgba(12, 17, 30, 0.96);
+  -webkit-backdrop-filter: blur(24px);
+
+  backdrop-filter: blur(24px);
+  box-shadow: 0 30px 60px -24px rgba(0, 0, 0, 0.9);
+}
+
+.picker__results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+  gap: 4px;
+  height: 300px;
+  overflow-y: auto;
+  margin-top: 10px;
+  align-content: start;
+}
+
+.picker__none {
+  grid-column: 1 / -1;
+  padding: 12px 4px;
+}
+
+.picker__skel {
+  aspect-ratio: 1;
+  border-radius: 11px;
+  background: var(--pill);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.picker__cell {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.picker__cell:hover {
+  background: var(--pill);
+}
+
+.picker__cell .licon {
+  width: 20px;
+  height: 20px;
+}
+
+/* ================================================================== toggle */
+
+.stats__toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.switch {
+  width: 34px;
+  height: 20px;
+  border-radius: 99px;
+  border: 1px solid var(--stroke-2);
+  background: var(--pill);
+  position: relative;
+  padding: 0;
+  cursor: pointer;
+}
+
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ice-2);
+  transition: transform 0.18s var(--ease), background 0.18s;
+}
+
+.switch--on {
+  background: var(--jade);
+  background: color-mix(in oklab, var(--jade) 40%, var(--pill));
+}
+
+.switch--on::after {
+  transform: translateX(14px);
+  background: var(--ice);
+}
+
+.credit {
+  padding: 42px 0 20px;
+  text-align: center;
+}
+
+/* ================================================================== login */
+
+.login__card {
+  width: min(380px, 100%);
+  display: grid;
+  gap: 16px;
+  padding: 32px;
+  border-radius: 24px;
+  border: 1px solid var(--stroke-2);
+  background: rgba(12, 17, 30, 0.94);
+  -webkit-backdrop-filter: blur(28px) saturate(150%);
+
+  backdrop-filter: blur(28px) saturate(150%);
+  box-shadow: 0 40px 90px -30px rgba(0, 0, 0, 0.9);
+  animation: sheet-in 0.24s var(--ease);
+}
+
+.error {
+  color: var(--rose);
+  font-size: 0.85rem;
+}
+
+/* ================================================================= states */
+
+.empty {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+  padding: 60px 0;
+  color: var(--ice-2);
+}
+
+.center-note {
+  display: grid;
+  place-items: center;
+  min-height: 60vh;
+  min-height: 60dvh;
+  color: var(--ice-3);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* ============================================================= responsive */
+
+@media (max-width: 1000px) {
+  /* No room for a rail beside three columns — it becomes a scrollable strip on top. */
+  .withnav {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .sidenav {
+    position: static;
+    margin-left: 0;
+    width: auto;
+    /* `justify-self: start` would size it to its content and let the row run off the
+       screen; stretched to the column with min-width: 0, it scrolls inside instead */
+    justify-self: stretch;
+    min-width: 0;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    margin-top: 26px;
+    padding: 8px;
+    border-radius: 18px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .sidenav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sidenav__caption {
+    display: none;
+  }
+
+  .sidenav__item {
+    flex: none;
+  }
+
+  .section__head[id] {
+    scroll-margin-top: 12px;
+  }
+
+  .bento {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .shell {
+    padding: 0 18px 100px;
+  }
+
+  .bento {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* let a tile grow past the row when its text needs the space */
+    grid-auto-rows: minmax(120px, auto);
+  }
+
+  .tile--l {
+    padding: 22px;
+  }
+
+  .tile--l .tile__icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .tile--l .tile__name {
+    font-size: 1.4rem;
+  }
+
+  .topbar__label {
+    display: none;
+  }
+
+  .greeting {
+    display: none;
+  }
+
+  /* too little width to float over the tile — let the toolbar take its own row */
+  .tile--editing .tile__tools {
+    position: static;
+    opacity: 1;
+    align-self: flex-end;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora__blob {
+    animation: none;
+  }
+
+  .tile,
+  .chip,
+  .btn,
+  .greeting {
+    animation: none;
+    transition-duration: 0.01ms;
+  }
+
+  .tile:hover {
+    transform: none;
+  }
+}

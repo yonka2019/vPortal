@@ -1,0 +1,31 @@
+{
+  "name": "vportal-newtab",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "VPortal — a link hub as your new tab page. Offline, no server, no account.",
+  "scripts": {
+    "dev": "vite",
+    "build:icons": "node scripts/build-icons.mjs",
+    "build": "npm run build:icons && vite build",
+    "package": "node scripts/package.mjs",
+    "test": "node --test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.0.4",
+    "lucide-static": "^0.544.0",
+    "simple-icons": "^15.16.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.9"
+  }
+}

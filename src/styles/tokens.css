@@ -1,0 +1,137 @@
+:root {
+  color-scheme: dark;
+
+  /* ink */
+  --void: #06090f;
+  --void-2: #0a0f1c;
+  --ice: #e9eefb;
+  --ice-2: #a6b3cb;
+  --ice-3: #68768f;
+
+  /* aurora */
+  --jade: #34e0b4;
+  --violet: #7c6bff;
+  --rose: #ff6ba8;
+
+  /* the live accent: whatever service the pointer is on paints the sky */
+  --beam: #7c6bff;
+
+  /* glass — dark and translucent, so it holds text over a lit backdrop */
+  --glass: rgba(9, 13, 22, 0.42);
+  --glass-2: rgba(16, 22, 36, 0.62);
+  --stroke: rgba(255, 255, 255, 0.085);
+  --stroke-2: rgba(255, 255, 255, 0.18);
+  --pill: rgba(38, 44, 58, 0.78);
+
+  /* type */
+  --display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+  --body: 'Inter Tight', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+
+  --radius: 16px;
+  --radius-sm: 10px;
+  --page: 1180px;
+  --ease: cubic-bezier(0.22, 0.75, 0.28, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--void);
+  /* hidden first: browsers without `clip` still suppress the aurora overhang */
+  overflow-x: hidden;
+  overflow-x: clip;
+  /* Firefox has no ::-webkit-scrollbar; this keeps its scrollbars on-theme */
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+/* The category rail jumps by `#anchor`; the glide is the browser's, not ours. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Transparent on purpose: an opaque body would paint over the aurora layer below it. */
+body {
+  margin: 0;
+  background: transparent;
+  color: var(--ice);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  min-height: 100dvh;
+  /* `hidden` here would make body a scroll container and kill the rail's sticky;
+     `clip` trims the aurora overhang without one. Old browsers keep `hidden`. */
+  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--beam);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: rgba(124, 107, 255, 0.45);
+  background: color-mix(in oklab, var(--beam) 45%, transparent);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--stroke-2);
+  border-radius: 99px;
+  border: 3px solid var(--void);
+}
+
+.mono {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ice-3);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
