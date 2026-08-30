@@ -59,7 +59,8 @@ data URI inside the link, so Export carries it.
    Node 22, `npm ci`, `npm run build`. First listed review is done by a human — days.
 3. **Chrome Web Store** — upload `dist.zip`. One-off $5 developer account.
 
-Listing copy and the privacy statement live in `store/listing.md`.
+Listing copy lives in `store/listing.md`; the privacy policy (Chrome asks for a URL —
+host `store/privacy-policy.md` as a gist), listing icon and screenshots sit beside it.
 
 `manifest.json` and `package.json` versions must match — `npm run package` refuses
 otherwise.

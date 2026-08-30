@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "VPortal",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Your links as a new tab: grouped, icon-labelled tiles. Offline, nothing leaves the browser.",
   "icons": {
     "16": "icons/orbit-16.png",
@@ -14,7 +14,10 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "yonka2003@gmail.com",
-      "strict_min_version": "128.0"
+      "strict_min_version": "128.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
     }
   }
 }

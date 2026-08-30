@@ -1,5 +1,16 @@
 # Changelog
 
+## [v1.0.1] : 2026-08-30
+
+Store-submission fixes. No code changes.
+
+- Manifest: `data_collection_permissions: { required: ["none"] }` — AMO now rejects
+  submissions without it.
+- `store/privacy-policy.md` — no-data-collected policy for the Chrome Web Store privacy
+  URL (host as a gist).
+- `store/icon-128.png` and `store/vportal-newtab-*.png` — listing icon and screenshots
+  (1440×900, 1920×1080, 1280×800).
+
 ## [v1.0.0] : 2026-08-30
 
 ----------- ENV CHANGES -------------

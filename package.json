@@ -1,6 +1,6 @@
 {
   "name": "vportal-newtab",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "type": "module",
   "description": "VPortal — a link hub as your new tab page. Offline, no server, no account.",
