@@ -54,7 +54,7 @@ export function sanitizeHub(body: unknown, previous?: Hub | null): Hub {
   }
   const sections = Array.isArray(raw.sections) ? raw.sections.slice(0, 50) : []
   return {
-    title: clean(raw.title, 80) || 'VPortal',
+    title: clean(raw.title, 80) || 'TileTab',
     subtitle: clean(raw.subtitle, 160),
     sections: sections.filter(Boolean).map((input: Partial<Section>) => ({
       id: id(input?.id),

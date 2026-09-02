@@ -1,17 +1,21 @@
 import {
   DndContext,
+  DragOverlay,
   KeyboardSensor,
+  MeasuringStrategy,
   PointerSensor,
   closestCenter,
+  useDroppable,
   useSensor,
   useSensors,
   type CollisionDetection,
   type DragEndEvent,
+  type DragOverEvent,
+  type DragStartEvent,
   type KeyboardCoordinateGetter,
 } from '@dnd-kit/core'
 import {
   SortableContext,
-  arrayMove,
   rectSortingStrategy,
   sortableKeyboardCoordinates,
   useSortable,
@@ -19,11 +23,20 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useState } from 'react'
+import { handOver, moveLink, moveSection, sectionOfLink, sectionOfTarget, zoneId } from '../reorder'
 import type { Hub, Link, Section } from '../types'
 import { uid } from '../uid'
 import { LinkDialog } from './LinkDialog'
 import { EditableTile } from './Tile'
 import { Copy, Grip, Pencil, Plus, Trash } from './glyphs'
+
+/**
+ * dnd-kit animates in JavaScript, so the `prefers-reduced-motion` block in the stylesheet
+ * never reaches it. Asked here instead: the tiles stop sliding aside and jump instead. The
+ * drag itself is unaffected — it is pointer-driven and never depended on an animation.
+ */
+const calmMotion = () =>
+  typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 
 const newLink = (): Link => ({
   id: uid(),
@@ -66,7 +79,10 @@ function SortableTile({
   onDuplicate: () => void
   onRemove: () => void
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: link.id })
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: link.id,
+    transition: calmMotion() ? null : undefined,
+  })
 
   return (
     <EditableTile
@@ -74,10 +90,15 @@ function SortableTile({
       index={index}
       innerRef={setNodeRef}
       style={{
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.55 : undefined,
-        zIndex: isDragging ? 5 : undefined,
+        // `Translate`, not `Transform`: the sorting strategy also hands back scaleX/scaleY
+        // when neighbours are different sizes, and this grid mixes four tile sizes — the
+        // tiles sliding aside stretched instead of moving.
+        transform: CSS.Translate.toString(transform),
+        // `.tile` animates transform over 340ms with an overshoot curve, which made the
+        // dragged tile swim after the pointer. dnd-kit's own transition is the only one
+        // that may drive a drag.
+        transition: isDragging ? 'none' : transition,
+        opacity: isDragging ? 0.25 : undefined,
       }}
       tools={
         <>
@@ -102,6 +123,16 @@ function SortableTile({
   )
 }
 
+/** A section whose links all left still needs somewhere to aim at. */
+function DropZone({ sectionId }: { sectionId: string }) {
+  const { setNodeRef, isOver } = useDroppable({ id: zoneId(sectionId) })
+  return (
+    <div ref={setNodeRef} className={isOver ? 'dropzone dropzone--over' : 'dropzone'}>
+      Drop a link here
+    </div>
+  )
+}
+
 function EditSection({
   section,
   onChange,
@@ -115,13 +146,21 @@ function EditSection({
   onDuplicate: () => void
   onRemove: () => void
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: section.id })
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: section.id,
+    transition: calmMotion() ? null : undefined,
+  })
 
   return (
     <section
       className="section section--editing"
       ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.55 : undefined }}
+      style={{
+        // Translate-only here too, for the same reason as the tiles.
+        transform: CSS.Translate.toString(transform),
+        transition: isDragging ? 'none' : transition,
+        opacity: isDragging ? 0.55 : undefined,
+      }}
     >
       <div className="section__head">
         <div className="section__title-row">
@@ -149,6 +188,7 @@ function EditSection({
 
       <SortableContext items={section.links.map((link) => link.id)} strategy={rectSortingStrategy}>
         <div className="bento bento--editing">
+          {section.links.length === 0 && <DropZone sectionId={section.id} />}
           {section.links.map((link, index) => (
             <SortableTile
               key={link.id}
@@ -180,7 +220,10 @@ function EditSection({
 
 export default function EditLayer({ hub, onChange }: { hub: Hub; onChange: (hub: Hub) => void }) {
   const [openId, setOpenId] = useState<string | null>(null)
-  const open = hub.sections.flatMap((section) => section.links).find((link) => link.id === openId) ?? null
+  const [dragId, setDragId] = useState<string | null>(null)
+  const links = hub.sections.flatMap((section) => section.links)
+  const open = links.find((link) => link.id === openId) ?? null
+  const dragged = links.find((link) => link.id === dragId) ?? null
 
   const replaceLink = (next: Link) =>
     onChange({
@@ -242,33 +285,41 @@ export default function EditLayer({ hub, onChange }: { hub: Hub; onChange: (hub:
     useSensor(KeyboardSensor, { coordinateGetter: keyboardCoordinates }),
   )
 
+  /**
+   * A link changes section while the pointer is still down, so the gap opens where the
+   * tile is going rather than after the drop. Reordering inside one section needs no state
+   * change — the sorting strategy already previews it — so only the crossing is handled here.
+   */
+  const onDragOver = ({ active, over }: DragOverEvent) => {
+    if (!over || isSection(String(active.id))) return
+    const from = sectionOfLink(hub, String(active.id))
+    const to = sectionOfTarget(hub, String(over.id))
+    if (from === -1 || to === -1 || from === to) return
+    onChange(handOver(hub, String(active.id), String(over.id)))
+  }
+
   const onDragEnd = ({ active, over }: DragEndEvent) => {
+    setDragId(null)
     if (!over || active.id === over.id) return
-
-    if (isSection(String(active.id))) {
-      const to = sectionIds.indexOf(String(over.id))
-      if (to === -1) return
-      onChange({ ...hub, sections: arrayMove(hub.sections, sectionIds.indexOf(String(active.id)), to) })
-      return
-    }
-
-    // ponytail: links move inside their own section only. Cross-section drops need a
-    // second collision pass — add it when someone actually asks to move links between groups.
-    const owner = hub.sections.find((section) => section.links.some((link) => link.id === active.id))
-    if (!owner) return
-    const to = owner.links.findIndex((link) => link.id === over.id)
-    if (to === -1) return
-    const from = owner.links.findIndex((link) => link.id === active.id)
-    onChange({
-      ...hub,
-      sections: hub.sections.map((section) =>
-        section.id === owner.id ? { ...section, links: arrayMove(section.links, from, to) } : section,
-      ),
-    })
+    const [activeId, overId] = [String(active.id), String(over.id)]
+    onChange(isSection(activeId) ? moveSection(hub, activeId, overId) : moveLink(hub, activeId, overId))
   }
 
   return (
-    <DndContext sensors={sensors} collisionDetection={collideWithinKind} onDragEnd={onDragEnd}>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={collideWithinKind}
+      /*
+       * Handing a link to another section rewrites the grids mid-drag. With the default
+       * strategy the droppable rects are measured once and go stale, so the release
+       * resolved against the old layout and the tile landed in the wrong slot.
+       */
+      measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
+      onDragStart={({ active }: DragStartEvent) => setDragId(String(active.id))}
+      onDragOver={onDragOver}
+      onDragEnd={onDragEnd}
+      onDragCancel={() => setDragId(null)}
+    >
       <SortableContext items={hub.sections.map((section) => section.id)} strategy={verticalListSortingStrategy}>
         {hub.sections.map((section) => (
           <EditSection
@@ -290,8 +341,22 @@ export default function EditLayer({ hub, onChange }: { hub: Hub; onChange: (hub:
       </button>
 
       <p className="mono" style={{ paddingTop: 16 }}>
-        Links without an address are dropped when you save.
+        Links without an address are dropped when you save. Drag a link into any section.
       </p>
+
+      {/*
+        The tile that follows the pointer is rendered here, above the page, so it can travel
+        between sections without being stacked under a neighbouring section. Sections have no
+        overlay: without one dnd-kit slides the section itself, which is what a full-width row
+        should do.
+
+        No drop animation: it fights `MeasuringStrategy.Always` and left the overlay floating
+        for over a second after the release. The tile is already in its slot by then, so
+        dropping the overlay on the spot is both correct and what it looks like.
+      */}
+      <DragOverlay dropAnimation={null}>
+        {dragged && <EditableTile link={dragged} index={0} overlay />}
+      </DragOverlay>
 
       {open && (
         <LinkDialog

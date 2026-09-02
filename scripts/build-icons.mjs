@@ -109,28 +109,41 @@ function png(size, pixels) {
   ])
 }
 
-/** The mark: a teal orbit — one ring, one satellite, one core. Same shape as the favicon. */
-function orbit(size) {
+/**
+ * The mark: the bento itself — one tall tile beside two small ones, the arrangement the
+ * page is built on. Corners come from a signed distance field so they stay clean at 16px.
+ */
+function tile(size) {
   const [r, g, b] = [0x34, 0xe0, 0xb4]
   const pixels = Buffer.alloc(size * size * 4)
-  const mid = (size - 1) / 2
-  const ring = size * 0.38
-  const stroke = Math.max(1, size * 0.075)
-  const core = size * 0.13
-  const satellite = { x: mid + ring * 0.707, y: mid - ring * 0.707, r: Math.max(1, size * 0.11) }
-  // One sample per pixel plus a half-pixel feather: enough at 16px, invisible at 128px.
-  const cover = (distance, edge) => Math.max(0, Math.min(1, edge - distance + 0.5))
+  const pad = size * 0.15
+  const gap = size * 0.085
+  const inner = size - pad * 2
+  const leftWidth = (inner - gap) * 0.54
+  const rightWidth = inner - gap - leftWidth
+  const rowHeight = (inner - gap) / 2
+  const radius = size * 0.075
+
+  const rects = [
+    [pad, pad, leftWidth, inner],
+    [pad + leftWidth + gap, pad, rightWidth, rowHeight],
+    [pad + leftWidth + gap, pad + rowHeight + gap, rightWidth, rowHeight],
+  ]
+
+  /** Distance to a rounded rectangle: negative inside it, zero on the edge. */
+  const distance = (x, y, [left, top, width, height]) => {
+    const dx = Math.max(Math.abs(x - (left + width / 2)) - Math.max(width / 2 - radius, 0), 0)
+    const dy = Math.max(Math.abs(y - (top + height / 2)) - Math.max(height / 2 - radius, 0), 0)
+    return Math.hypot(dx, dy) - radius
+  }
 
   for (let y = 0; y < size; y += 1) {
     for (let x = 0; x < size; x += 1) {
-      const dx = x - mid
-      const dy = y - mid
-      const d = Math.hypot(dx, dy)
-      const alpha = Math.max(
-        cover(Math.abs(d - ring), stroke / 2),
-        cover(d, core),
-        cover(Math.hypot(x - satellite.x, y - satellite.y), satellite.r),
-      )
+      // One sample per pixel plus a half-pixel feather: enough at 16px, invisible at 128px.
+      let alpha = 0
+      for (const rect of rects) {
+        alpha = Math.max(alpha, Math.min(1, Math.max(0, 0.5 - distance(x + 0.5, y + 0.5, rect))))
+      }
       const at = (y * size + x) * 4
       pixels[at] = r
       pixels[at + 1] = g
@@ -142,7 +155,7 @@ function orbit(size) {
 }
 
 for (const size of [16, 32, 48, 128]) {
-  fs.writeFileSync(path.join(OUT, `orbit-${size}.png`), orbit(size))
+  fs.writeFileSync(path.join(OUT, `tile-${size}.png`), tile(size))
 }
 
 console.log(`${index.length} icons indexed (${copied} colour logos), 4 add-on icons`)

@@ -1,8 +1,8 @@
-# VPortal — Privacy Policy
+# TileTab — Privacy Policy
 
 _Last updated: 2026-08-30_
 
-VPortal is a new-tab extension. It collects **no user data**.
+TileTab is a new-tab extension. It collects **no user data**.
 
 ## What the extension does
 

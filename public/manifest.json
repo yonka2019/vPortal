@@ -1,16 +1,17 @@
 {
   "manifest_version": 3,
-  "name": "VPortal",
-  "version": "1.0.1",
+  "name": "TileTab",
+  "version": "1.1.0",
   "description": "Your links as a new tab: grouped, icon-labelled tiles. Offline, nothing leaves the browser.",
   "icons": {
-    "16": "icons/orbit-16.png",
-    "32": "icons/orbit-32.png",
-    "48": "icons/orbit-48.png",
-    "128": "icons/orbit-128.png"
+    "16": "icons/tile-16.png",
+    "32": "icons/tile-32.png",
+    "48": "icons/tile-48.png",
+    "128": "icons/tile-128.png"
   },
   "permissions": ["storage"],
   "chrome_url_overrides": { "newtab": "newtab.html" },
+  "background": { "service_worker": "background.js", "scripts": ["background.js"] },
   "browser_specific_settings": {
     "gecko": {
       "id": "yonka2003@gmail.com",

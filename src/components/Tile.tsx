@@ -57,18 +57,20 @@ export function EditableTile({
   tools,
   innerRef,
   style,
+  overlay,
 }: {
   link: Link
   index: number
-  tools: ReactNode
+  tools?: ReactNode
   innerRef?: (node: HTMLElement | null) => void
   style?: CSSProperties
+  overlay?: boolean
 }) {
   const brand = tintOf(link)
   return (
     <div
       ref={innerRef}
-      className={`tile tile--${link.size ?? 's'} tile--editing`}
+      className={`tile tile--${link.size ?? 's'} tile--editing${overlay ? ' tile--overlay' : ''}`}
       style={{ ...tileStyle(link, brand, index), ...style }}
     >
       <LinkIcon className="tile__icon" slug={link.iconSlug} color={readable(link.iconColor)} lazy />
@@ -79,7 +81,7 @@ export function EditableTile({
         {link.desc && <span className="tile__sub">{link.desc}</span>}
         {!link.url && <span className="tile__warn mono">No address yet</span>}
       </span>
-      <div className="tile__tools">{tools}</div>
+      {tools && <div className="tile__tools">{tools}</div>}
     </div>
   )
 }

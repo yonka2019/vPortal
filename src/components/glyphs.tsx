@@ -100,9 +100,19 @@ export const LongShape = ({ size = 18 }: Props) => (
   </svg>
 )
 
-export const Orbit = ({ size = 15 }: Props) => (
+/** The add-on's own mark: the bento, same arrangement as `public/icons/tile-*.png`. */
+export const Tiles = ({ size = 15 }: Props) => (
   <svg {...base(size)}>
-    <circle cx="12" cy="12" r="3" />
-    <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(-30 12 12)" />
+    <rect x="3" y="3" width="7" height="18" rx="2.2" />
+    <rect x="14" y="3" width="7" height="7.5" rx="2.2" />
+    <rect x="14" y="13.5" width="7" height="7.5" rx="2.2" />
+  </svg>
+)
+
+/** Support. A heart, not the Ko-fi wordmark: their button is a hosted image, and nothing
+    on this page may load from a CDN. */
+export const Heart = ({ size = 14 }: Props) => (
+  <svg {...base(size)}>
+    <path d="M12 20s-7-4.4-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.6-7 9-7 9Z" />
   </svg>
 )

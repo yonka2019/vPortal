@@ -1,10 +1,14 @@
 const NEW_TAB = 'vp_new_tab'
 const EDITING = 'vp_editing'
 
-/** Visitor preference, not admin config: each person decides, kept for their tab session. */
+/**
+ * Whether links open in a new tab. Default on. `localStorage`, not `sessionStorage`: the
+ * hosted version scoped this to one visitor's tab session, but a new-tab page opens a fresh
+ * session every single time, so the choice was forgotten on every tab.
+ */
 export const opensInNewTab = () => {
   try {
-    return sessionStorage.getItem(NEW_TAB) !== 'off'
+    return localStorage.getItem(NEW_TAB) !== 'off'
   } catch {
     return true // private mode or storage disabled
   }
@@ -12,7 +16,8 @@ export const opensInNewTab = () => {
 
 export const setOpensInNewTab = (on: boolean) => {
   try {
-    sessionStorage.setItem(NEW_TAB, on ? 'on' : 'off')
+    if (on) localStorage.removeItem(NEW_TAB)
+    else localStorage.setItem(NEW_TAB, 'off')
   } catch {
     // nothing to do — the toggle just won't persist
   }

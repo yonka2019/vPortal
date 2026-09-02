@@ -2,7 +2,7 @@ import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } fro
 import type { CSSProperties } from 'react'
 import { countClick, getHub, saveHub } from '../api'
 import { readable } from '../color'
-import { greetings } from '../greeting'
+import { greetings, nextIndex } from '../greeting'
 import { opensInNewTab, rememberEditing, setOpensInNewTab, setShowsFrequent, showsFrequent, wasEditing } from '../prefs'
 import { sanitizeHub } from '../sanitize'
 import type { Hub as HubData } from '../types'
@@ -11,24 +11,32 @@ import { CommandPalette, type Entry } from './CommandPalette'
 import { LinkIcon } from './LinkIcon'
 import { SideNav, sectionAnchor } from './SideNav'
 import { Tile } from './Tile'
-import { Download, NewTabGlyph, Orbit, Pencil, SameTabGlyph, Search, Upload } from './glyphs'
+import { Download, Heart, NewTabGlyph, Pencil, SameTabGlyph, Search, Tiles, Upload } from './glyphs'
 
 // The editor carries the drag-and-drop library; visitors never download it.
 const EditLayer = lazy(() => import('./EditLayer'))
 
 const clone = (hub: HubData): HubData => JSON.parse(JSON.stringify(hub))
 
-/** Cycles the lines for the current part of the day, re-reading the clock each turn. */
+/**
+ * One line drawn at random from the pool for this hour and this weekday, redrawn every few
+ * seconds. Random from the first paint on purpose: a new tab is usually closed within
+ * seconds, so a fixed opening line meant the weekday lines were never seen.
+ * `greetings()` is re-read on every turn, so a rollover past midnight is picked up.
+ */
 function Greeting() {
-  const [turn, setTurn] = useState(0)
+  const [index, setIndex] = useState(() => Math.floor(Math.random() * greetings().length))
 
   useEffect(() => {
-    const timer = setInterval(() => setTurn((n) => n + 1), 7000)
+    const timer = setInterval(() => {
+      const count = greetings().length
+      setIndex((current) => nextIndex(current, count))
+    }, 7000)
     return () => clearInterval(timer)
   }, [])
 
   const lines = greetings()
-  const line = lines[turn % lines.length]
+  const line = lines[index % lines.length]
   return (
     <p className="greeting" key={line}>
       {line}
@@ -158,7 +166,7 @@ export function Hub({ editOnLoad = false }: { editOnLoad?: boolean }) {
     const address = URL.createObjectURL(file)
     const anchor = document.createElement('a')
     anchor.href = address
-    anchor.download = `vportal-${new Date().toISOString().slice(0, 10)}.json`
+    anchor.download = `tiletab-${new Date().toISOString().slice(0, 10)}.json`
     anchor.click()
     URL.revokeObjectURL(address)
   }
@@ -328,7 +336,7 @@ export function Hub({ editOnLoad = false }: { editOnLoad?: boolean }) {
         </Suspense>
       ) : shown.sections.length === 0 ? (
         <div className="empty">
-          <Orbit size={26} />
+          <Tiles size={26} />
           <h2>No links yet</h2>
           <p>Turn on Edit to add the first section.</p>
           <button className="btn btn--primary" type="button" onClick={startEditing}>
@@ -361,7 +369,13 @@ export function Hub({ editOnLoad = false }: { editOnLoad?: boolean }) {
         <CommandPalette entries={entries} newTab={newTab} onClose={() => setPaletteOpen(false)} />
       )}
 
-      <footer className="credit mono">by yonka · v{__APP_VERSION__}</footer>
+      <footer className="credit mono">
+        by yonka · v{__APP_VERSION__} ·{' '}
+        <a className="credit__support" href="https://ko-fi.com/yonka2019" target="_blank" rel="noreferrer noopener">
+          <Heart />
+          Support
+        </a>
+      </footer>
     </div>
   )
 }

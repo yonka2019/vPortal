@@ -1,4 +1,4 @@
-# VPortal newtab — working notes
+# TileTab newtab — working notes
 
 An MV3 new-tab extension: one page of grouped links, editable in place, stored in the
 browser. Ported from the hosted VPortal (Express + Mongo) at `X:\EXT-VP\VPortal`. Read
@@ -6,8 +6,12 @@ browser. Ported from the hosted VPortal (Express + Mongo) at `X:\EXT-VP\VPortal`
 
 ## Shape
 
-- Vite + React 19 + TS. No router, no Tailwind, no CSS-in-JS, no background script, no
-  content script, no toolbar action. One page: `newtab.html`.
+- Vite + React 19 + TS. No router, no Tailwind, no CSS-in-JS, no content script, no
+  toolbar action. One page: `newtab.html`.
+- `public/background.js` is the only background code: `onInstalled` (install + update)
+  opens one new tab so the page shows itself. Plain file, not bundled. Manifest lists it as
+  both `service_worker` (Chrome) and `scripts` (Firefox has no MV3 service workers yet);
+  each browser reads its key and ignores the other. `tabs.create` needs no permission.
 - `permissions: ["storage"]` and **no `host_permissions`** — the add-on makes no network
   requests, which is what the store listing promises. Keep it that way; anything that
   needs a host permission changes the review and the privacy claim.
@@ -32,6 +36,11 @@ browser. Ported from the hosted VPortal (Express + Mongo) at `X:\EXT-VP\VPortal`
   `chrome.storage`, so edit mode is always open. Don't reintroduce a login.
 - `npm run dev` has no `chrome.storage`, so `api.ts` falls back to `localStorage` with the
   same shape. That fallback is what makes the page testable outside the extension.
+- `src/prefs.ts` holds the three per-browser switches — new tab / this tab, the "Most
+  opened" strip, and whether edit mode was left on. All three are `localStorage`, read
+  synchronously at first render, and none of them travels with Export. Nothing here may use
+  `sessionStorage`: a new-tab page gets a fresh session on every tab, so the choice would be
+  forgotten every time.
 
 ## Icons
 
@@ -68,7 +77,21 @@ one line below a plain fallback (`-webkit-mask` before `mask`, flat colour befor
 - A dialog's mount effect depends on `[]`, never on a handler prop — the editor re-renders
   per keystroke and re-running focus-restore made fields untypeable.
 - One `DndContext` shares a flat droppable registry: sections and links must be filtered
-  apart in both `collisionDetection` and the keyboard `coordinateGetter`.
+  apart in both `collisionDetection` and the keyboard `coordinateGetter`. Zone ids are not
+  section ids, so they already sort with the links.
+- **Nothing but dnd-kit may animate a drag.** `.tile` carries a 340ms overshoot transition
+  on `transform`; without `transition: none` while dragging it drove every pointer move and
+  the tile swam behind the cursor. The overlay rule is `.tile.tile--overlay` for the same
+  reason — plain `.tile--overlay` sits earlier in the file and loses on source order.
+- Links change section on `onDragOver`, so the layout is rewritten mid-drag. That needs
+  `MeasuringStrategy.Always`: with the default the droppable rects go stale and the release
+  lands on the old layout. The list surgery is pure and tested in `src/reorder.ts`.
+- A section with no links has no tile to aim at, so it renders `DropZone` — a droppable
+  whose id is `zone:<sectionId>`, which is how the last link can leave a section.
+- dnd-kit animates in JavaScript, so the stylesheet's `prefers-reduced-motion` block cannot
+  reach it: `calmMotion()` in `EditLayer` reads the query and drops the slide-aside. The
+  drop settle is off for everyone — it fought `Always` measuring and left the overlay
+  hanging for over a second.
 - `crypto.randomUUID` is secure-context only; ids go through `src/uid.ts`.
 - `src/sanitize.ts` imports `./uid.ts` **with** the extension: its test runs in plain Node,
   which doesn't resolve extensionless paths the way Vite does.

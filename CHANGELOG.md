@@ -1,5 +1,36 @@
 # Changelog
 
+## [v1.1.0] : 2026-09-02
+
+- **Renamed to TileTab.** Manifest name, page title, seed hub title, package name, store
+  listing and privacy policy all carry the new name, and an exported file is now
+  `tiletab-<date>.json`. Listing copy rewritten and the screenshots retaken under the new
+  name as `store/tiletab-1280x800-*.png` plus a 1920×1080 hero, two Chrome promo tiles and
+  Ko-fi cover art.
+  References to the hosted VPortal the page was ported from are left as they are — that is
+  a different project, not this one.
+- **New mark.** The icon is the bento itself — one tall tile beside two small ones, drawn
+  in `scripts/build-icons.mjs` as `icons/tile-*.png`, replacing the orbit. Same teal. The
+  in-page glyph and `store/icon-128.png` match.
+- A **Support** link in the footer, pointing at Ko-fi. Inline heart glyph, not Ko-fi's
+  hosted button image — nothing on the page may load from a CDN.
+- Fixed: `source.zip` now carries `public/background.js`. The packager names `public/`
+  files one by one, and the worker was not on the list — AMO would have seen a file in the
+  build with no source behind it.
+- Install and update open one new tab (`public/background.js`, `onInstalled`). Manifest
+  gains `background` with `service_worker` + `scripts`. No new permissions.
+- Links can be dragged into another section, and a section emptied that way offers a drop
+  zone so links can come back. Move logic in `src/reorder.ts`, covered by
+  `test/reorder.test.mjs`.
+- The header greeting now draws a random line from the pool for this hour and this weekday,
+  from the first paint. Monday and Friday read differently, and the line always changes on
+  each turn rather than repeating.
+- Fixed: the new tab / this tab switch is remembered for good. It sat in `sessionStorage`,
+  and a new-tab page starts a fresh session on every tab, so it reset every time.
+- Fixed: the dragged tile trailed the pointer by 340ms with an overshoot, because `.tile`'s
+  transform transition was animating the drag. The tile now tracks the pointer as an
+  overlay, and the tile it left holds its slot open.
+
 ## [v1.0.1] : 2026-08-30
 
 Store-submission fixes. No code changes.

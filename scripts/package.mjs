@@ -111,7 +111,7 @@ write('dist.zip', walk(dist))
 // purpose: `npm run build:icons` regenerates it from simple-icons and lucide-static.
 const SOURCE = [
   'src', 'scripts', 'test', 'store', 'public/fonts',
-  'public/manifest.json', 'public/hub.default.json',
+  'public/manifest.json', 'public/hub.default.json', 'public/background.js',
   'newtab.html', 'package.json', 'package-lock.json', 'tsconfig.json', 'vite.config.ts',
   'README.md', 'CLAUDE.md', 'CHANGELOG.md', 'LICENSE', '.gitignore',
 ]

@@ -1,4 +1,4 @@
-# VPortal — new tab extension
+# TileTab — new tab extension
 
 Your links as the new tab page: grouped, icon-labelled tiles over a drifting aurora.
 Chrome and Firefox, MV3. Everything lives in the browser — no server, no account, no
@@ -31,10 +31,19 @@ One hub document in `chrome.storage.local` under `hub`. First run seeds it from 
 bundled `public/hub.default.json`. Edit mode has no password — a check in the page would
 guard nothing when storage is one devtools click away.
 
+In edit mode, drag a link by its grip to reorder it or to drop it into another section;
+drag a section by the grip beside its name. Keyboard: focus a grip, Space, arrows, Space.
+
 **Export / Import** (in edit mode) moves the hub between browsers and machines as JSON.
 That is the only sync there is.
 
 Delete the `hub` key to get the sample back.
+
+The new tab / this tab switch, the "Most opened" strip and edit mode are remembered per
+browser in `localStorage`, separately from the hub — Export does not carry them.
+
+Install and update each open one new tab (`public/background.js`). Nothing else runs in
+the background.
 
 ## Icons
 
@@ -46,7 +55,7 @@ Delete the `hub` key to get the sample back.
   checkout of the hosted VPortal (`DASH_SRC=...` to point elsewhere). SVG only: the whole
   SVG half of that catalogue is 44MB. PNG-only logos aren't bundled — upload them instead.
 - `index.json` — the search index the picker loads on first open.
-- `orbit-*.png` — the add-on's own icon.
+- `tile-*.png` — the add-on's own icon.
 
 **Custom logos**: the link dialog takes an SVG/PNG/JPEG/WebP up to 128KB. It's stored as a
 data URI inside the link, so Export carries it.
