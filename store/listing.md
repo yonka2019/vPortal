@@ -1,12 +1,31 @@
 # Store listing
 
 ## Name
-TileTab — Link Hub New Tab
+TileTab
+
+Just the name. Appending keywords ("Link Hub New Tab") to the title is what the Chrome
+Web Store's spam policy calls improperly formatted metadata — the 2026-09-02 rejection
+cited that policy. Put the description in the description.
 
 ## Summary (CWS, ≤132 chars)
-Your links as your new tab. Beautiful bento tiles, ~5,200 icons, fully offline. No account, no tracking.
+Your own links as the new tab page: tiles in sections, about 5,200 icons, search. Works offline. No account, no tracking.
 
-## Description
+## Description (Chrome Web Store — plain text, no emoji, no markdown)
+Rewritten after the "Spam and Placement" rejection. CWS renders plain text only, and its
+automated review reads emoji-heavy or adjective-heavy copy as improperly formatted
+metadata. Keep this one factual.
+
+TileTab replaces the new tab page with a grid of your own links.
+
+Links are shown as tiles in four sizes, grouped into sections you name, and each tile is coloured after the service it points to. A category rail on the left jumps between sections. Press Ctrl+K (Cmd+K on Mac) to search every link by name.
+
+Editing happens in place. Drag tiles to reorder them or to move them into another section. Pick from about 5,200 built-in icons or upload your own logo. Choose whether links open in a new tab or the current one. A "Most opened" row appears once a few links have been clicked.
+
+Your data stays in the browser. TileTab requests only the storage permission, has no host permissions, and never makes a network request. Export and Import move your links between browsers as a JSON file.
+
+Free and open source. Respects the reduced-motion setting.
+
+## Description (emoji version — for Ko-fi, GitHub, social; NOT for the Chrome Web Store)
 Your new tab, but it's yours. 🌌
 
 TileTab replaces the new tab with a dark, quiet wall of your own links. Super simple to
@@ -25,6 +44,11 @@ set up, beautiful to look at, and minimal on purpose — no feeds, no widgets, n
 🔒 Offline, always. No account, no server, no analytics. The add-on asks for no host
 permissions, which means it cannot make a network request even if it wanted to. Your links
 never leave your browser.
+
+## Chrome Web Store appeal (if the resubmission is rejected again)
+Under 1,000 characters, plain text:
+
+TileTab is a new-tab replacement: it shows the user's own links as a grid of tiles, stored in chrome.storage.local. It requests only the storage permission and makes no network requests. It is my only item in the store; the earlier "VPortal" listing was the same extension before a rename and has been [removed / is this same item]. The description has been rewritten as plain factual text with no emoji, and the title is the bare product name. I believe the item now complies with the Spam and Placement policy and ask for a re-review.
 
 ## Description for AMO (their Markdown subset)
 Paste into the Firefox listing's Description field. AMO renders `**bold**`, `_italic_`,

@@ -1,5 +1,11 @@
 # Changelog
 
+## [v1.1.1] : 2026-09-03
+
+- Store listing rewritten for the Chrome Web Store spam policy: bare name, plain factual
+  description, no emoji. Emoji copy kept for Ko-fi and GitHub. Appeal draft added. No code
+  change.
+
 ## [v1.1.0] : 2026-09-02
 
 - **Renamed to TileTab.** Manifest name, page title, seed hub title, package name, store
