@@ -1,5 +1,11 @@
 # Changelog
 
+## [v1.1.3] : 2026-09-04
+
+- Working notes only, no code change: `CLAUDE.md` gains a Releasing section recording that
+  `/y-git-up` in this repo must also run `/build`, so the store zips are produced as part
+  of a release rather than being remembered separately.
+
 ## [v1.1.2] : 2026-09-04
 
 - The footer byline links to yonka.digital. Opens in a new tab, `rel="noreferrer noopener"`.

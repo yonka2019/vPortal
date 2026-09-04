@@ -133,6 +133,13 @@ one line below a plain fallback (`-webkit-mask` before `mask`, flat colour befor
   that way.
 - `build.minify: false` is deliberate — AMO reviewers read the shipped file.
 
+## Releasing
+
+`/y-git-up` in this repo must also run `/build` — the store zips are part of a release
+here, not a separate errand. `/build` runs `npm run package`, which writes `dist.zip` and
+`source.zip` and refuses if `package.json` and `public/manifest.json` versions differ.
+Order: bump both versions, `npm run build`, then `/build`, then commit, push, tag.
+
 ## Not built (deliberately)
 
 Accounts, sync between browsers (Export/Import instead), the RSS ticker (it needs a host
