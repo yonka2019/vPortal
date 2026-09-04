@@ -1,3 +1,33 @@
+/* ============================================================== page fade */
+
+/* One fade for the whole page, and nothing moves.
+   It is a curtain that lifts, not the page fading in: putting `opacity` on `.shell` or
+   `#root` would wrap the content in an opacity group, and every tile's `backdrop-filter`
+   would then sample that group instead of the real backdrop for as long as the fade ran.
+   A plain overlay fading away touches none of the compositing below it.
+   The resting state is `opacity: 0`, and the animation starts at 1 — so the curtain is
+   invisible whenever the animation does not run. Written the other way round, the
+   reduced-motion rule below would leave it sitting over the page for good.
+   0.2s, and don't lengthen it: the curtain starts opaque, so its whole run is time the
+   reader spends looking at a page that has already finished. Tiles are in the DOM at
+   ~75ms; at 0.35s the page was not visible until ~270ms, at 0.2s it is ~180ms. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--void);
+  opacity: 0;
+  pointer-events: none;
+  animation: page-in 0.2s ease;
+}
+
+@keyframes page-in {
+  from {
+    opacity: 1;
+  }
+}
+
 /* ============================================================ aurora sky */
 
 /* 100vw, not inset:0 — a fixed box stops at the scrollbar, which left a hard unlit
@@ -13,6 +43,11 @@
   background: radial-gradient(120% 80% at 50% -10%, var(--void-2) 0%, var(--void) 60%);
 }
 
+/* The drift steps instead of easing, and every `steps()` count below works out to six
+   moves a second. The blobs cross ~7px a second, so a step is one or two pixels of a
+   gradient that is blurred to nothing anyway — but each move re-blurs the backdrop of
+   every tile above it, so at 60fps the GPU was recompositing the whole window forever
+   for motion no one can see. Six a second costs a tenth of that and looks the same. */
 .aurora__blob {
   position: absolute;
   width: 68vmax;
@@ -30,7 +65,7 @@
   top: -34%;
   left: -18%;
   opacity: 0.55;
-  animation: drift-1 38s ease-in-out infinite;
+  animation: drift-1 38s steps(114) infinite;
 }
 
 .aurora__blob--2 {
@@ -39,7 +74,7 @@
   top: -6%;
   right: -30%;
   opacity: 0.45;
-  animation: drift-2 47s ease-in-out infinite;
+  animation: drift-2 47s steps(141) infinite;
 }
 
 .aurora__blob--3 {
@@ -48,7 +83,7 @@
   bottom: -46%;
   left: 26%;
   opacity: 0.36;
-  animation: drift-3 59s ease-in-out infinite;
+  animation: drift-3 59s steps(177) infinite;
 }
 
 /* the light comes from above: everything below the fold settles back to black */
@@ -681,14 +716,6 @@ kbd {
   backdrop-filter: blur(18px) saturate(140%);
   overflow: hidden;
   transition: transform 0.34s cubic-bezier(0.2, 1.25, 0.4, 1), border-color 0.3s var(--ease);
-  animation: tile-in 0.5s var(--ease) backwards;
-}
-
-@keyframes tile-in {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(0.985);
-  }
 }
 
 /* the brand arrives as a light source in the top-right corner, not as a flat wash */
@@ -1247,6 +1274,26 @@ kbd {
   color: var(--rose);
 }
 
+/* The byline is the link to the author's site, and it has to look like one at rest.
+   Underlining it only on hover left no sign it went anywhere: the footer is mono uppercase
+   at 0.7rem, so a colour shift alone is not read as a link. It sits a step brighter than
+   the text around it and carries a faint underline that goes full strength on hover. */
+.credit__site {
+  color: var(--ice-2);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(166, 179, 203, 0.45);
+  text-decoration-color: color-mix(in oklab, var(--ice-2) 45%, transparent);
+  transition: color 0.2s var(--ease), text-decoration-color 0.2s var(--ease);
+}
+
+.credit__site:hover,
+.credit__site:focus-visible {
+  color: var(--ice);
+  text-decoration-color: currentColor;
+}
+
 /* ================================================================== login */
 
 .login__card {
@@ -1384,6 +1431,7 @@ kbd {
     animation: none;
   }
 
+  body::after,
   .tile,
   .chip,
   .btn,

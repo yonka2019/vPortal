@@ -2,6 +2,7 @@ import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } fro
 import type { CSSProperties } from 'react'
 import { countClick, getHub, saveHub } from '../api'
 import { readable } from '../color'
+import { cacheIcons } from '../icons'
 import { greetings, nextIndex } from '../greeting'
 import { opensInNewTab, rememberEditing, setOpensInNewTab, setShowsFrequent, showsFrequent, wasEditing } from '../prefs'
 import { sanitizeHub } from '../sanitize'
@@ -73,7 +74,12 @@ export function Hub({ editOnLoad = false }: { editOnLoad?: boolean }) {
 
   useEffect(() => {
     getHub()
-      .then(setHub)
+      .then((loaded) => {
+        setHub(loaded)
+        // Not awaited: this run paints as it always did, and inlines the marks so the next
+        // new tab draws them with the tiles instead of a frame later.
+        void cacheIcons(loaded.sections.flatMap((section) => section.links.map((link) => link.iconSlug)))
+      })
       .catch((cause: Error) => setError(cause.message))
   }, [])
 
@@ -355,8 +361,8 @@ export function Hub({ editOnLoad = false }: { editOnLoad?: boolean }) {
                   <p className="mono">{section.links.length} links</p>
                 </div>
                 <div className="bento">
-                  {section.links.map((link, index) => (
-                    <Tile key={link.id} link={link} index={index} newTab={newTab} />
+                  {section.links.map((link) => (
+                    <Tile key={link.id} link={link} newTab={newTab} />
                   ))}
                 </div>
               </section>
@@ -370,7 +376,10 @@ export function Hub({ editOnLoad = false }: { editOnLoad?: boolean }) {
       )}
 
       <footer className="credit mono">
-        by yonka · v{__APP_VERSION__} ·{' '}
+        <a className="credit__site" href="https://yonka.digital" target="_blank" rel="noreferrer noopener">
+          yonka
+        </a>{' '}
+        · v{__APP_VERSION__} ·{' '}
         <a className="credit__support" href="https://ko-fi.com/yonka2019" target="_blank" rel="noreferrer noopener">
           <Heart />
           Support

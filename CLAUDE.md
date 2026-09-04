@@ -32,6 +32,9 @@ browser. Ported from the hosted VPortal (Express + Mongo) at `X:\EXT-VP\VPortal`
 - `src/api.ts` keeps the last read hub in a module variable. `countClick` needs it: a
   read-modify-write would have to wait for storage to answer, and the tab is usually
   navigating away by then. One unawaited `set` survives; a round-trip does not.
+- `src/greeting.ts` works the **Israeli week**: Sunday opens it, Thursday is the last
+  workday, Friday and Saturday are the weekend. A Sunday line that reads as time off is a
+  bug; `test/greeting.test.js` asserts it.
 - No password. A gate checked in the page guards nothing when the data sits in
   `chrome.storage`, so edit mode is always open. Don't reintroduce a login.
 - `npm run dev` has no `chrome.storage`, so `api.ts` falls back to `localStorage` with the
@@ -74,15 +77,44 @@ one line below a plain fallback (`-webkit-mask` before `mask`, flat colour befor
 ## Gotchas
 
 - `body` must stay `background: transparent`, or it paints over the aurora at `z-index: -2`.
-- A dialog's mount effect depends on `[]`, never on a handler prop — the editor re-renders
-  per keystroke and re-running focus-restore made fields untypeable.
-- One `DndContext` shares a flat droppable registry: sections and links must be filtered
-  apart in both `collisionDetection` and the keyboard `coordinateGetter`. Zone ids are not
-  section ids, so they already sort with the links.
-- **Nothing but dnd-kit may animate a drag.** `.tile` carries a 340ms overshoot transition
-  on `transform`; without `transition: none` while dragging it drove every pointer move and
-  the tile swam behind the cursor. The overlay rule is `.tile.tile--overlay` for the same
-  reason — plain `.tile--overlay` sits earlier in the file and loses on source order.
+- **The aurora drift steps, and must keep stepping.** `steps()` on each blob works out to
+  six moves a second. Every move re-blurs the backdrop of all 16 tiles, so easing it at
+  60fps pinned the GPU forever (Viz compositor 42% busy, GPU main 38%) for motion of about
+  one pixel a frame. Stepping costs a tenth of that and looks identical. Restore
+  `ease-in-out` and the drain comes straight back.
+- **A hub's marks are inlined and cached; masks must never go back to fetching files.**
+  `cacheIcons()` in `src/icons.ts` fetches each mark once, turns it into a `data:` URI and
+  keeps the map in `localStorage` under `vp_icons`, keyed by the app version so a rebuild
+  with redrawn marks invalidates it. `iconUrl()` reads that map synchronously at first
+  render, so from the second new tab onwards a tile's mask needs no request at all. A miss
+  falls back to the file path, which is the old behaviour, so this can never be slower.
+  It is called unawaited — nothing waits on it, and the first ever load paints as it always
+  did.
+  **Preloading was the obvious fix and it does not work.** A `mask-image` only starts
+  loading once its tile has painted, and a mask reads a cache that neither `new Image()`
+  nor `<link rel="preload" as="image">` fills — both doubled the requests. Warming it with
+  a real offscreen masked `<span>` works in Chrome but **not** in a Firefox extension page,
+  where the tiles fetched every mark a third time: three requests per mark on every new
+  tab, and marks that took about a second to appear. That shipped once and was reverted.
+  Don't try it again.
+  The guard in `svgToDataUri` has to allow what precedes the tag — every lucide mark opens
+  with its ISC licence comment, and requiring `<svg` first silently refused all of them.
+  `test/icons.test.mjs` covers that.
+- **The page fades in as one; individual tiles never animate.** `body::after` is a curtain
+  in the void colour that starts opaque and fades away in 0.35s. Five per-tile entrances
+  were tried before this and every one was rejected: a `scale(0.985)` grow-in that widened
+  a 2x2 tile by 8px late, a 12px rise on a per-tile stagger that made every title look like
+  it travelled, a plain opacity fade at three speeds, and a 4px rise split from its fade.
+  Anything that moves or restages a tile reads as the page jumping — one fade over
+  everything does not, because nothing shifts relative to anything else.
+  Two things about the curtain are load-bearing. It must stay an overlay: putting `opacity`
+  on `.shell` or `#root` wraps the content in an opacity group, and every tile's
+  `backdrop-filter` then samples that group instead of the real backdrop while the fade
+  runs. And its resting state must be `opacity: 0` with the keyframe starting at 1 — write
+  it the other way round and the reduced-motion rule, which kills the animation, leaves the
+  curtain sitting over the page for good.
+  If a per-tile entrance is ever revisited, the `index` prop that fed the stagger is gone
+  from `Tile`, `EditableTile` and `SortableTile`.
 - Links change section on `onDragOver`, so the layout is rewritten mid-drag. That needs
   `MeasuringStrategy.Always`: with the default the droppable rects go stale and the release
   lands on the old layout. The list surgery is pure and tested in `src/reorder.ts`.

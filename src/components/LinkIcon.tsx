@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react'
-import { iconHref, isColourLogo } from '../icons'
+import { iconHref, iconUrl, isColourLogo } from '../icons'
 
 /**
  * A link's mark. One-colour icons are a CSS mask over a tinted box: there is no server to
@@ -35,7 +35,7 @@ export function LinkIcon({
           className="licon__mask"
           role={title ? 'img' : undefined}
           aria-label={title || undefined}
-          style={{ '--icon': `url("${href}")`, '--icon-color': color } as CSSProperties}
+          style={{ '--icon': `url("${iconUrl(slug)}")`, '--icon-color': color } as CSSProperties}
         />
       )}
     </span>

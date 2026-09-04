@@ -32,6 +32,18 @@ test('the weekday adds its own lines, indexed Sunday first', () => {
   assert.match(day(10), /Saturday/)
 })
 
+test('the week is the Israeli one: Sunday works, Friday and Saturday are off', () => {
+  const pool = (dayOfMonth) => greetings(on(dayOfMonth)).join(' | ').toLowerCase()
+  // Sunday and Thursday are workdays, so neither may read as time off.
+  for (const workday of [4, 8]) {
+    assert.doesNotMatch(pool(workday), /off the clock|nothing ships|the cluster can wait/)
+  }
+  // Thursday is the last one before the weekend; Friday and Saturday are the weekend.
+  assert.match(pool(8), /nearly out|nobody deploys/)
+  assert.match(pool(9), /off the clock|the cluster can wait/)
+  assert.match(pool(10), /quiet on the wire|nothing ships/)
+})
+
 test('the time of day still comes first, so the day name never replaces it', () => {
   assert.match(greeting(on(7)), /Good morning/)
   assert.match(greeting(new Date(2026, 0, 7, 19, 0)), /Good evening/)

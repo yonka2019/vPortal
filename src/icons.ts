@@ -21,6 +21,86 @@ export function iconHref(slug: string) {
 }
 
 /**
+ * A mark, inlined, so a tile never waits on the network to draw it.
+ *
+ * The problem this solves: a `mask-image` only starts loading once the tile carrying it
+ * has been painted, so tiles always appeared complete with their text and the marks
+ * dropped in a frame or two later. Preloading cannot fix it — a mask reads a cache that
+ * neither `new Image()` nor `<link rel="preload" as="image">` fills, and warming it with a
+ * real masked element works in Chrome but not in a Firefox extension page, where the
+ * tiles simply fetched everything again. See the gotcha in CLAUDE.md.
+ *
+ * So the mark stops being a network resource. Each one is fetched once, turned into a
+ * `data:` URI and kept in `localStorage`; from the next new tab onwards the URI is read
+ * synchronously at first render and the mask needs no request at all. A miss just falls
+ * back to the file path, which is exactly the old behaviour — this can never be slower
+ * than not having it.
+ */
+const CACHE = 'vp_icons'
+
+/**
+ * Percent-encoded, not base64: no `btoa` UTF-8 trap, and it survives CSS `url("…")`.
+ *
+ * The guard has to allow what comes before the tag — every lucide mark opens with its
+ * ISC licence comment, and requiring `<svg` first silently refused all of them. It still
+ * refuses an HTML error page, which is the thing worth keeping out of the cache.
+ */
+const SVG_OPENER = /^\s*(?:<\?xml[^>]*\?>|<!--[\s\S]*?-->|<!DOCTYPE[^>]*>)*\s*<svg/i
+
+export function svgToDataUri(text: string): string {
+  if (!SVG_OPENER.test(text)) throw new Error('not an svg')
+  return `data:image/svg+xml,${encodeURIComponent(text)}`
+}
+
+type IconCache = { v: string; m: Record<string, string> }
+
+const readCache = (): Record<string, string> => {
+  try {
+    const raw = JSON.parse(localStorage.getItem(CACHE) ?? 'null') as IconCache | null
+    // Tied to the build: a new version may ship redrawn marks, and a stale inline copy
+    // would outlive the file it came from.
+    return raw && raw.v === __APP_VERSION__ ? raw.m : {}
+  } catch {
+    return {} // private mode, disabled storage, or junk in the key
+  }
+}
+
+let inlined = readCache()
+
+/** The URL a mask should use: the inlined copy when there is one, the file otherwise. */
+export const iconUrl = (slug: string) => inlined[slug] ?? iconHref(slug)
+
+/**
+ * Fill the cache for the marks a hub uses. Fire-and-forget on purpose — nothing waits for
+ * it, so a cold first run paints exactly as it does today and only the next tab is faster.
+ * The map is rewritten to just these slugs, so dropping a link prunes its mark too.
+ */
+export async function cacheIcons(slugs: Iterable<string>): Promise<void> {
+  const wanted = [...new Set(slugs)].filter((slug) => slug && !isColourLogo(slug))
+  const next: Record<string, string> = {}
+  await Promise.all(
+    wanted.map(async (slug) => {
+      if (inlined[slug]) {
+        next[slug] = inlined[slug]
+        return
+      }
+      try {
+        const response = await fetch(iconHref(slug))
+        if (response.ok) next[slug] = svgToDataUri(await response.text())
+      } catch {
+        // A missing or unreadable mark just stays a file path forever. Not worth a retry.
+      }
+    }),
+  )
+  inlined = next
+  try {
+    localStorage.setItem(CACHE, JSON.stringify({ v: __APP_VERSION__, m: next } satisfies IconCache))
+  } catch {
+    // Over quota or storage disabled: the page still works, it just re-fetches next time.
+  }
+}
+
+/**
  * What the picker offers before anyone types. Search covers the whole catalogue; this is
  * the browsable shortlist, so it spans the stack first and then everything else a portal
  * tends to link to. Slugs missing from the bundle are dropped silently.

@@ -27,7 +27,10 @@ const accentOf = (section: Section) => {
  * the only script here is the highlight: one rAF-throttled measurement per scroll.
  */
 export function SideNav({ sections }: { sections: Section[] }) {
-  const [current, setCurrent] = useState('')
+  // Seeded with the first category, which is what a page opened at the top measures to
+  // anyway. Starting empty meant the rail painted with no row lit and then lit one a
+  // frame later, next to tiles that were doing the same thing with their icons.
+  const [current, setCurrent] = useState(() => sections[0]?.id ?? '')
   // A clicked row lights at once and stays lit until the visitor scrolls by hand: the
   // sections flying past during the glide must not repaint it, and at the end of the page
   // a clamped scroll leaves the target mid-screen, where no measurement would name it.

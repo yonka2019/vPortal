@@ -1,5 +1,34 @@
 # Changelog
 
+## [v1.1.2] : 2026-09-04
+
+- The footer byline links to yonka.digital. Opens in a new tab, `rel="noreferrer noopener"`.
+  No new permission and no request from the page — a link the reader clicks is navigation,
+  so the "no network requests" claim in the listing still holds.
+- The page fades in as a whole, over 0.2s, instead of the tiles arriving one by one.
+  Several per-tile entrances were tried — a scale-in, a staggered rise, a plain fade at
+  three speeds, a small rise split from its fade — and each read as the page jumping,
+  because anything that moves a tile moves the title and mark a reader is looking at. The
+  fade is an overlay that lifts, so no tile's position, size or backdrop blur changes at
+  any point. Reduced motion skips it.
+- Fixed: the marks appeared a frame or two after the tiles that carry them. A CSS mask
+  only starts loading once its tile has been painted, so a tile was always drawn complete
+  with its text and empty where its mark goes. Each mark a hub uses is now fetched once,
+  inlined as a `data:` URI and cached per browser, so from the second new tab onwards the
+  mask is already in the stylesheet and needs no request: measured at 16 of 16 marks
+  cached and zero icon requests per load, in Chrome and Firefox both. The first ever load
+  is unchanged, nothing waits on the cache being filled.
+- The aurora drift steps six times a second instead of easing at 60fps. Each move re-blurs
+  the backdrop of every tile, so the old version kept the GPU compositing the whole window
+  for as long as the tab was open — GPU compositor busy time drops from ~42% to ~3.5%, and
+  drawn frames from 200/s to 7/s. The blobs travel about 7px a second, so a step is one or
+  two pixels of a gradient that is blurred to nothing: the motion looks the same.
+- Fixed: the category rail painted with no row lit and lit one a frame later. The first
+  category is lit from the start, which is what a page opened at the top measures to
+  anyway.
+- Greeting weekdays follow the Israeli week: Sunday opens it, Thursday is the last workday,
+  Friday and Saturday are the weekend.
+
 ## [v1.1.1] : 2026-09-03
 
 - Store listing rewritten for the Chrome Web Store spam policy: bare name, plain factual

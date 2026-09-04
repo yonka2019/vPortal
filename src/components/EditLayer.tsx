@@ -68,13 +68,11 @@ const insertAfter = <T extends { id: string }>(items: T[], id: string, made: T) 
 
 function SortableTile({
   link,
-  index,
   onOpen,
   onDuplicate,
   onRemove,
 }: {
   link: Link
-  index: number
   onOpen: () => void
   onDuplicate: () => void
   onRemove: () => void
@@ -87,7 +85,6 @@ function SortableTile({
   return (
     <EditableTile
       link={link}
-      index={index}
       innerRef={setNodeRef}
       style={{
         // `Translate`, not `Transform`: the sorting strategy also hands back scaleX/scaleY
@@ -189,11 +186,10 @@ function EditSection({
       <SortableContext items={section.links.map((link) => link.id)} strategy={rectSortingStrategy}>
         <div className="bento bento--editing">
           {section.links.length === 0 && <DropZone sectionId={section.id} />}
-          {section.links.map((link, index) => (
+          {section.links.map((link) => (
             <SortableTile
               key={link.id}
               link={link}
-              index={index}
               onOpen={() => onOpenLink(link.id)}
               onDuplicate={() => onChange({ ...section, links: insertAfter(section.links, link.id, copyOfLink(link)) })}
               onRemove={() => onChange({ ...section, links: section.links.filter((item) => item.id !== link.id) })}
@@ -355,7 +351,7 @@ export default function EditLayer({ hub, onChange }: { hub: Hub; onChange: (hub:
         dropping the overlay on the spot is both correct and what it looks like.
       */}
       <DragOverlay dropAnimation={null}>
-        {dragged && <EditableTile link={dragged} index={0} overlay />}
+        {dragged && <EditableTile link={dragged} overlay />}
       </DragOverlay>
 
       {open && (

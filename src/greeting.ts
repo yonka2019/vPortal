@@ -7,15 +7,19 @@ const SETS: [number, string[]][] = [
   [24, ['Good night', 'Last deploy of the day?', 'Lights out soon', 'The servers can take it from here']],
 ]
 
-/** Lines tied to the weekday, indexed the way `Date.getDay()` counts — Sunday first. */
+/**
+ * Lines tied to the weekday, indexed the way `Date.getDay()` counts — Sunday first.
+ * The week is the Israeli one: Sunday opens it, Thursday closes it, and the weekend is
+ * Friday and Saturday. Sunday must never read as a day off, Thursday is the last push.
+ */
 const DAYS: string[][] = [
-  ['Sunday, quiet on the wire', 'Nothing ships on a Sunday'],
-  ['Monday again, stranger', 'Monday. Check the weekend alerts'],
-  ['Tuesday, the real Monday', 'Tuesday, still early in the week'],
-  ['Wednesday, over the hump', 'Midweek, halfway up'],
-  ['Thursday, almost', 'Thursday. One more after this'],
-  ['Friday, nearly out', 'Nobody deploys on a Friday'],
-  ['Saturday, off the clock', 'Saturday. The cluster can wait'],
+  ['Sunday, the week starts here', 'Sunday. Check the weekend alerts'],
+  ['Monday, second day in', 'Monday, still early in the week'],
+  ['Tuesday, over the hump', 'Midweek, halfway up'],
+  ['Wednesday, almost', 'Wednesday. Two more after this'],
+  ['Thursday, nearly out', 'Nobody deploys on a Thursday'],
+  ['Friday, off the clock', 'Friday. The cluster can wait'],
+  ['Saturday, quiet on the wire', 'Nothing ships on a Saturday'],
 ]
 
 const hours = (at: Date) => SETS.find(([until]) => at.getHours() < until)?.[1] ?? SETS[SETS.length - 1][1]

@@ -6,13 +6,12 @@ import { resetBeam, setBeam } from './Aurora'
 import { ArrowOut } from './glyphs'
 import { LinkIcon } from './LinkIcon'
 
-const tileStyle = (link: Link, brand: string, index: number) => {
+const tileStyle = (link: Link, brand: string) => {
   const span = SPANS[link.size] ?? SPANS.s
   return {
     '--brand': brand,
     gridColumn: `span ${span.columns}`,
     gridRow: `span ${span.rows}`,
-    animationDelay: `${Math.min(index, 14) * 35}ms`,
   } as CSSProperties
 }
 
@@ -20,7 +19,7 @@ const tileStyle = (link: Link, brand: string, index: number) => {
 const tintOf = (link: Link) => readable(link.tintColor || link.iconColor)
 
 /** What visitors see: the whole tile is the link. */
-export function Tile({ link, index, newTab }: { link: Link; index: number; newTab: boolean }) {
+export function Tile({ link, newTab }: { link: Link; newTab: boolean }) {
   const brand = tintOf(link)
   return (
     <a
@@ -28,7 +27,7 @@ export function Tile({ link, index, newTab }: { link: Link; index: number; newTa
       href={link.url}
       target={newTab ? '_blank' : undefined}
       rel="noreferrer"
-      style={tileStyle(link, brand, index)}
+      style={tileStyle(link, brand)}
       onMouseEnter={() => setBeam(brand)}
       onMouseLeave={resetBeam}
       onFocus={() => setBeam(brand)}
@@ -53,14 +52,12 @@ export function Tile({ link, index, newTab }: { link: Link; index: number; newTa
  */
 export function EditableTile({
   link,
-  index,
   tools,
   innerRef,
   style,
   overlay,
 }: {
   link: Link
-  index: number
   tools?: ReactNode
   innerRef?: (node: HTMLElement | null) => void
   style?: CSSProperties
@@ -71,7 +68,7 @@ export function EditableTile({
     <div
       ref={innerRef}
       className={`tile tile--${link.size ?? 's'} tile--editing${overlay ? ' tile--overlay' : ''}`}
-      style={{ ...tileStyle(link, brand, index), ...style }}
+      style={{ ...tileStyle(link, brand), ...style }}
     >
       <LinkIcon className="tile__icon" slug={link.iconSlug} color={readable(link.iconColor)} lazy />
       <span className="tile__body">
