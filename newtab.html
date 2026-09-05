@@ -6,6 +6,9 @@
     <meta name="color-scheme" content="dark" />
     <meta name="description" content="TileTab — your links as a new tab." />
     <title>TileTab</title>
+    <!-- Sets the tab title from the renamed hub while the document is still parsing, so
+         "TileTab" does not flash before the bundle mounts. -->
+    <script src="/title.js"></script>
     <link rel="icon" href="/icons/tile-32.png" />
     <!-- Vendored fonts: an extension page must never reach out to Google Fonts. -->
     <link rel="stylesheet" href="/fonts/fonts.css" />

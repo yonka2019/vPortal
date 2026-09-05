@@ -42,6 +42,15 @@ browser. Ported from the hosted VPortal (Express + Mongo) at `X:\EXT-VP\VPortal`
   `sanitizeHub` like anything else stored, and never travels with Export.
   `test/api.test.mjs` covers it. `api.ts` therefore imports `./sanitize.ts` **with** the
   extension, for the same reason `sanitize.ts` imports `./uid.ts` that way.
+- **`public/title.js` sets the tab title, and it has to stay a separate file in `<head>`.**
+  `newtab.html` carries one fixed `<title>`, so a renamed hub flashed "TileTab" for as long
+  as the bundle took to load and mount — every new tab. A classic (non-module) script in
+  the head runs while the document is still parsing, about a second before React on a cold
+  load, and reads the hub name out of the same `vp_hub` mirror. It cannot be inlined: MV3
+  page CSP allows no inline `<script>`. Vite copies `public/` verbatim and leaves the
+  absolute `/title.js` tag alone — check `dist/newtab.html` if you touch it. React's effect
+  still owns the title after that, including the "— editing" suffix and a live rename.
+  `test/title.test.mjs` runs the file the way the browser does.
 - `src/greeting.ts` works the **Israeli week**: Sunday opens it, Thursday is the last
   workday, Friday and Saturday are the weekend. A Sunday line that reads as time off is a
   bug; `test/greeting.test.js` asserts it.

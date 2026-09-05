@@ -1,5 +1,16 @@
 # Changelog
 
+## [v1.1.5] : 2026-09-05
+
+- Fixed: a renamed hub showed "TileTab" in the tab title first and its own name a moment
+  later, on every new tab. `newtab.html` can only carry one fixed `<title>`, and the page
+  set the real one from React, after mounting — so the placeholder stood for as long as
+  the bundle took to load. `public/title.js` now sets it while the document is still
+  parsing, out of the same mirror the tiles paint from: measured correct at 755ms against
+  874ms for the first line of app code. React still owns the title after that, so the
+  "— editing" suffix and a rename typed live are unchanged. The first tab after installing
+  still shows "TileTab", which is its name until you change it.
+
 ## [v1.1.4] : 2026-09-05
 
 - Fixed: a new tab in Firefox showed "Loading" for about two seconds before a single tile
