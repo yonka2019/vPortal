@@ -32,6 +32,16 @@ browser. Ported from the hosted VPortal (Express + Mongo) at `X:\EXT-VP\VPortal`
 - `src/api.ts` keeps the last read hub in a module variable. `countClick` needs it: a
   read-modify-write would have to wait for storage to answer, and the tab is usually
   navigating away by then. One unawaited `set` survives; a round-trip does not.
+- **The hub is mirrored into `localStorage` under `vp_hub`, and that mirror is what the
+  first frame draws.** `storage.local` is an IPC round trip to IndexedDB and Firefox never
+  preloads an overridden new tab, so every tab is a cold content process: answering that
+  read took about two seconds of "Loading" before a tile appeared. `mirroredHub()` is the
+  initial state of `Hub`, `getHub`/`saveHub`/`countClick` rewrite the mirror, and the real
+  read reconciles when it lands — identical documents keep the same object so an open draft
+  never looks unsaved. Storage stays the truth; the mirror is a paint cache, goes through
+  `sanitizeHub` like anything else stored, and never travels with Export.
+  `test/api.test.mjs` covers it. `api.ts` therefore imports `./sanitize.ts` **with** the
+  extension, for the same reason `sanitize.ts` imports `./uid.ts` that way.
 - `src/greeting.ts` works the **Israeli week**: Sunday opens it, Thursday is the last
   workday, Friday and Saturday are the weekend. A Sunday line that reads as time off is a
   bug; `test/greeting.test.js` asserts it.

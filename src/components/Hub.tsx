@@ -1,6 +1,6 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
-import { countClick, getHub, saveHub } from '../api'
+import { countClick, getHub, mirroredHub, saveHub } from '../api'
 import { readable } from '../color'
 import { cacheIcons } from '../icons'
 import { greetings, nextIndex } from '../greeting'
@@ -63,7 +63,9 @@ function Clock() {
 }
 
 export function Hub({ editOnLoad = false }: { editOnLoad?: boolean }) {
-  const [hub, setHub] = useState<HubData | null>(null)
+  // The mirror, read synchronously, so the tiles are in the first frame instead of after
+  // storage answers. Null only before the very first load has ever run.
+  const [hub, setHub] = useState<HubData | null>(mirroredHub)
   const [draft, setDraft] = useState<HubData | null>(null)
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -75,7 +77,11 @@ export function Hub({ editOnLoad = false }: { editOnLoad?: boolean }) {
   useEffect(() => {
     getHub()
       .then((loaded) => {
-        setHub(loaded)
+        // Same document as the mirror almost always: keep the object then, so the
+        // reconcile neither re-renders nor makes an open draft look unsaved.
+        setHub((current) =>
+          current && JSON.stringify(current) === JSON.stringify(loaded) ? current : loaded,
+        )
         // Not awaited: this run paints as it always did, and inlines the marks so the next
         // new tab draws them with the tiles instead of a frame later.
         void cacheIcons(loaded.sections.flatMap((section) => section.links.map((link) => link.iconSlug)))

@@ -37,6 +37,10 @@ drag a section by the grip beside its name. Keyboard: focus a grip, Space, arrow
 **Export / Import** (in edit mode) moves the hub between browsers and machines as JSON.
 That is the only sync there is.
 
+A copy also sits in `localStorage` under `vp_hub`, so a new tab paints its tiles
+immediately instead of waiting on `chrome.storage` (visible in Firefox, ~2s). Storage is
+still the truth.
+
 Delete the `hub` key to get the sample back.
 
 The new tab / this tab switch, the "Most opened" strip and edit mode are remembered per

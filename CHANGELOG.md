@@ -1,5 +1,19 @@
 # Changelog
 
+## [v1.1.4] : 2026-09-05
+
+- Fixed: a new tab in Firefox showed "Loading" for about two seconds before a single tile
+  appeared. The page painted nothing until `chrome.storage.local` answered, and that read
+  is an IPC round trip to IndexedDB — cheap in Chrome, slow in Firefox, which never
+  preloads an overridden new tab, so every tab pays it in a cold content process. The hub
+  is now mirrored into `localStorage` and read synchronously at first render, the same
+  trade the inlined marks already make; storage answers a moment later and reconciles.
+  Measured at 16 of 16 tiles in the first frame and a 0ms mirror read. The very first tab
+  after installing is unchanged — there is nothing mirrored yet.
+- Storage stays the only source of truth: the mirror is a paint cache, it is shaped by
+  `sanitizeHub` like anything else read back, it carries click counts so the "Most opened"
+  strip is never a click behind, and Export does not include it.
+
 ## [v1.1.3] : 2026-09-04
 
 - Working notes only, no code change: `CLAUDE.md` gains a Releasing section recording that
