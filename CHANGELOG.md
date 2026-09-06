@@ -1,5 +1,18 @@
 # Changelog
 
+## [v1.2.0] : 2026-09-06
+
+- **Any scheme your machine answers to.** An address had to be `http(s)`; now `mongodb://`,
+  `ssh://`, `rdp://`, `vscode://` and the rest are kept whole — a multi-host connection
+  string included — while `javascript:`, `data:`, `vbscript:`, `blob:` and `filesystem:`
+  are still dropped on save and on import, because a tile is an `<a>` and its href is what
+  the browser would run. A bare host still gets `https://` assumed. Same policy and the same
+  test cases as the hosted VPortal.
+- Working notes only, otherwise: the hosted VPortal and this add-on must stay in feature
+  parity. Both `CLAUDE.md` files carry the rule and the list of what cannot cross (server,
+  login and RSS stay hosted; CSS-mask icons, the mark cache and the footer links stay here).
+  The hosted side took the `vp_hub` mirror and `title.js` in return.
+
 ## [v1.1.5] : 2026-09-05
 
 - Fixed: a renamed hub showed "TileTab" in the tab title first and its own name a moment

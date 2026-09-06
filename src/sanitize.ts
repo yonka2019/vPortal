@@ -19,6 +19,15 @@ const clean = (value: unknown, max: number) =>
 export const CUSTOM_MAX = 128 * 1024
 const CUSTOM = /^data:image\/(svg\+xml|png|jpeg|webp)[;,]/i
 
+/**
+ * Schemes that run code instead of addressing something. This is a denylist, not an
+ * allowlist: a hub is full of `mongodb://`, `redis://`, `ssh://`, `rdp://`, `vscode://` and
+ * whatever else the machine's tools register, and guessing that list in advance is hopeless.
+ * What must never get through is a URL that executes in the page — the tile is an `<a>`,
+ * and its href is exactly what the browser would run. Same five as the hosted VPortal.
+ */
+const DANGEROUS_SCHEMES = new Set(['javascript:', 'data:', 'vbscript:', 'blob:', 'filesystem:'])
+
 export function safeUrl(value: unknown) {
   const raw = clean(value, 2048)
   if (!raw) return ''
@@ -27,8 +36,12 @@ export function safeUrl(value: unknown) {
   // internal hub. Assume https rather than dropping the link on save.
   const candidate = /^[a-z][a-z0-9+.-]*:/i.test(raw) ? raw : `https://${raw}`
   try {
+    // `href`, not the raw string: the parser lowercases the scheme and strips the tabs and
+    // newlines a browser would strip too, so `java&#9;script:` cannot slip past the check
+    // below and then turn back into `javascript:` in the page. Non-special schemes come
+    // back byte-identical, so a multi-host connection string survives whole.
     const parsed = new URL(candidate)
-    return ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : ''
+    return DANGEROUS_SCHEMES.has(parsed.protocol) ? '' : parsed.href
   } catch {
     return ''
   }

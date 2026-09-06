@@ -31,9 +31,18 @@ import { EditableTile } from './Tile'
 import { Copy, Grip, Pencil, Plus, Trash } from './glyphs'
 
 /**
- * dnd-kit animates in JavaScript, so the `prefers-reduced-motion` block in the stylesheet
- * never reaches it. Asked here instead: the tiles stop sliding aside and jump instead. The
- * drag itself is unaffected — it is pointer-driven and never depended on an animation.
+ * dnd-kit animates in JavaScript, so the stylesheet's `prefers-reduced-motion` block never
+ * reaches it — it has to be asked here.
+ *
+ * As things stand this changes nothing, and that is worth writing down: with
+ * `MeasuringStrategy.Always` below, dnd-kit hands every displaced tile its own 0ms
+ * transition on every frame, so nothing slides for anybody. Measured on the pointer and
+ * the keyboard path, in both media states: the inline transition is `transform linear`
+ * either way, never the 200ms default.
+ *
+ * It stays because it is two lines and it is the guard that has to exist the moment
+ * `MeasuringStrategy.Always` goes — dnd-kit's 200ms transition comes back with it, and
+ * a reduced-motion visitor would then have tiles sliding under them again.
  */
 const calmMotion = () =>
   typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches

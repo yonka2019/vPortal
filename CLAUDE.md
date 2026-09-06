@@ -4,6 +4,10 @@ An MV3 new-tab extension: one page of grouped links, editable in place, stored i
 browser. Ported from the hosted VPortal (Express + Mongo) at `X:\EXT-VP\VPortal`. Read
 `README.md` for setup; this file records what the code alone doesn't say.
 
+**The two must stay in feature parity** — a feature or fix landing in one is ported to the
+other in the same sitting, unless it is on the list at the bottom of this file of things
+that cannot cross. Check that repo's `CHANGELOG.md` when you start.
+
 ## Shape
 
 - Vite + React 19 + TS. No router, no Tailwind, no CSS-in-JS, no content script, no
@@ -26,9 +30,18 @@ browser. Ported from the hosted VPortal (Express + Mongo) at `X:\EXT-VP\VPortal`
   `public/hub.default.json`.
 - **`src/sanitize.ts` is the whole validation boundary** — the server that used to do this
   is gone. Both Save and Import go through it, and an imported file is untrusted input:
-  `safeUrl` drops anything that isn't `http(s)` or root-relative, colours must be `#rrggbb`,
-  and click counts are carried from the stored copy so an edit never resets them.
-  `test/sanitize.test.mjs` covers those.
+  colours must be `#rrggbb`, and click counts are carried from the stored copy so an edit
+  never resets them. `test/sanitize.test.mjs` covers those.
+- `safeUrl()` is a **denylist**, not an allowlist — same policy as the hosted VPortal:
+  `javascript:`, `data:`, `vbscript:`, `blob:` and `filesystem:` vanish on save, everything
+  else is kept (`mongodb://`, `ssh://`, `rdp://`, `vscode://`, whatever the machine's tools
+  register). A tile is an `<a>`, so its href is exactly what the browser would run, and
+  only those five run code. It returns `parsed.href`, never the raw string: the URL parser
+  lowercases the scheme and strips the tabs and newlines a browser also strips, so
+  `java&#9;script:` cannot pass the check and turn back into `javascript:`. Non-special
+  schemes come back byte for byte, so a multi-host connection string survives whole. A
+  schemeless `grafana.internal` gets `https://` assumed rather than dropped. The test runs
+  the same addresses the hosted `test/safe.test.js` does.
 - `src/api.ts` keeps the last read hub in a module variable. `countClick` needs it: a
   read-modify-write would have to wait for storage to answer, and the tab is usually
   navigating away by then. One unawaited `set` survives; a round-trip does not.
@@ -140,9 +153,13 @@ one line below a plain fallback (`-webkit-mask` before `mask`, flat colour befor
 - A section with no links has no tile to aim at, so it renders `DropZone` — a droppable
   whose id is `zone:<sectionId>`, which is how the last link can leave a section.
 - dnd-kit animates in JavaScript, so the stylesheet's `prefers-reduced-motion` block cannot
-  reach it: `calmMotion()` in `EditLayer` reads the query and drops the slide-aside. The
-  drop settle is off for everyone — it fought `Always` measuring and left the overlay
-  hanging for over a second.
+  reach it: `calmMotion()` in `EditLayer` asks `matchMedia` and passes `transition: null`
+  to every `useSortable`. **Today it changes nothing**: with `MeasuringStrategy.Always`
+  dnd-kit gives every displaced tile a 0ms transition on every frame, so no tile slides for
+  anyone. It is kept as the guard that has to exist the moment that measuring strategy
+  goes, because dnd-kit's 200ms transition returns with it — don't delete it as dead code
+  without putting a reduced-motion check back. The drop settle is off for everyone — it
+  fought `Always` measuring and left the overlay hanging for over a second.
 - `crypto.randomUUID` is secure-context only; ids go through `src/uid.ts`.
 - `src/sanitize.ts` imports `./uid.ts` **with** the extension: its test runs in plain Node,
   which doesn't resolve extensionless paths the way Vite does.
@@ -164,3 +181,19 @@ Order: bump both versions, `npm run build`, then `/build`, then commit, push, ta
 Accounts, sync between browsers (Export/Import instead), the RSS ticker (it needs a host
 permission), a popup or toolbar action, light mode, image upload beyond the 128KB logo.
 Each is a real feature, not an oversight — ask before adding.
+
+**What does not cross to or from the hosted VPortal** (`X:\EXT-VP\VPortal`), and why —
+everything else does, both ways, see the top of this file:
+
+- From there, not here: the server, the login, the RSS ticker, `/admin`, the inline-SVG
+  picker grid and the `dash:` PNG catalogue (only the SVG logos the seed names ship).
+- From here, not there: `LinkIcon`'s CSS masks and the `vp_icons` mark cache (the server
+  recolours there, and HTTP caching covers the rest), the footer links (the target machine
+  there has no internet), `src/sanitize.ts` as a whole (the server is the boundary there;
+  `src/safe.ts` is its client echo, with `shapeHub()` doing what `sanitizeHub` does for
+  Import and the mirror).
+
+Ported so far: the hosted side took cross-section drag, logo upload, the Israeli-week
+greeting, stepped aurora, the page fade, `localStorage` prefs and the drag fixes (its
+v1.9.0), then the `vp_hub` mirror and `public/title.js`. This side took the `safeUrl`
+denylist back.

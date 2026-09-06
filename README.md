@@ -43,6 +43,12 @@ still the truth.
 
 Delete the `hub` key to get the sample back.
 
+An address can be any scheme your machine answers to — `https://`, but also `mongodb://`,
+`ssh://`, `rdp://`, `vscode://`. A bare host like `grafana.internal` assumes `https://`.
+Addresses that would run code in the page (`javascript:`, `data:`, `vbscript:`, `blob:`,
+`filesystem:`) are dropped on save and on import. Whether a non-web link opens is up to
+the browser and whatever app is registered for that scheme.
+
 The new tab / this tab switch, the "Most opened" strip and edit mode are remembered per
 browser in `localStorage`, separately from the hub — Export does not carry them.
 

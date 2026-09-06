@@ -1,6 +1,6 @@
 {
   "name": "tiletab-newtab",
-  "version": "1.1.5",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "description": "TileTab — a link hub as your new tab page. Offline, no server, no account.",
